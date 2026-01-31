@@ -1,0 +1,47 @@
+# API Keys and secrets
+.Renviron
+.env
+*.key
+credentials.json
+
+# R artifacts
+.Rhistory
+.Rapp.history
+.RData
+.Ruserdata
+*.Rproj.user/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+*.so
+
+# Quarto render artifacts (keep final outputs, ignore intermediate)
+*_files/
+*_cache/
+.quarto/
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Sensitive documents - be careful with patient data
+# Uncomment if needed:
+# review_examples/*.pdf
+# review_examples/*.qmd
+
+# Temporary files
+*.tmp
+*.temp
+*.log
