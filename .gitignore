@@ -52,3 +52,6 @@ review_examples/dat/
 *.tmp
 *.temp
 *.log
+*.aux
+*.toc
+*.tex
