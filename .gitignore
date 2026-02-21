@@ -22,6 +22,8 @@ __pycache__/
 *_files/
 *_cache/
 .quarto/
+review_prototype.html
+review_prototype.pdf
 
 # OS files
 .DS_Store
@@ -38,8 +40,13 @@ Thumbs.db
 
 # Sensitive documents - be careful with patient data
 # Uncomment if needed:
-# review_examples/*.pdf
+review_examples/*.pdf
 # review_examples/*.qmd
+
+# Local review run artifacts
+review_results/prototype_jobs/
+review_results/prototype_runs/
+review_examples/dat/
 
 # Temporary files
 *.tmp
