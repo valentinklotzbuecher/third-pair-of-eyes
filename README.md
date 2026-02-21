@@ -11,9 +11,12 @@ Use `review_prototype.qmd` as the active document.
 Current report behavior:
 - HTML report output (`review_prototype.html`)
 - intro/instructions collapsed at top
-- settings snapshot shown in report
-- latest saved OpenAI and Anthropic review outputs displayed side by side
-- cost summary with pricing/source footnote
+- compact run summary strip (document, models, estimated total cost)
+- additional runtime settings in a collapsed details block
+- setup/helpers + manual API chunks grouped in collapsed reference callout
+- latest saved OpenAI and Anthropic outputs shown as provider cards
+- per-provider metadata (collapsed), Top 3 Major Issues preview, full review text
+- summary section with cost breakdown + prompt used for model calls
 
 API call chunks are intentionally `eval: false`, so render does not execute API requests.
 
