@@ -20,11 +20,15 @@ Current report behavior:
 
 API call chunks are intentionally `eval: false`, so render does not execute API requests.
 
+## Slides Entry Point
+
+Use `review_slides.qmd` for the team presentation. It introduces API-key setup, reproducible LLM use from R, `ellmer` basics, when direct SDK access is useful, and the review prototype as a worked example.
+
 ## Quick Start
 
 ```bash
 # 1) Put input files in review_examples/
-#    - one .pdf
+#    - one .pdf and/or
 #    - one .qmd
 
 # 2) Set API keys locally (for example in ~/.Renviron):
