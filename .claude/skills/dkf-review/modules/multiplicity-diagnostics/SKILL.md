@@ -21,7 +21,9 @@ Trigger: more than one primary endpoint, arm or time point; interim analyses; a
 claim on a secondary endpoint; a subgroup or effect-modification claim; a
 specification chosen among several. `NOT_APPLICABLE` when one prespecified primary
 hypothesis carries every confirmatory claim and secondary results are presented
-without inferential claims.
+without inferential claims. Candidate endpoint definitions compared in an SSE to choose
+the primary endpoint are a design choice, not multiplicity, unless more than one of
+them is to carry a confirmatory claim.
 
 ## Core checks
 

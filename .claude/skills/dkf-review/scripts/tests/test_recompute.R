@@ -117,5 +117,17 @@ check("power_curve_crossing warns on misfit", inherits(w, "warning"))
 loc <- power_curve_crossing(n, rej, R, target = 0.8, window = c(70, 110))
 check("power_curve_crossing local window", abs(loc$crossing / truth - 1) < 0.03 && loc$window[1] >= 70)
 
+# inline expressions
+source(file.path(dirname(here), "inline_values.R"))
+qmd <- tempfile(fileext = ".qmd")
+writeLines(c("---", "title: \"`r 1 + 1`\"", "---", "", "```{r}", "n <- 84", "x <- \"`r not_inline`\"", "```",
+             "", "We need `r n` evaluable and `r ceiling(n / 0.9)` randomised; `r undefined_obj`."), qmd)
+ex <- inline_exprs(qmd)
+check("inline_exprs skips front matter and chunks", nrow(ex) == 3 && all(ex$line == 10))
+n <- 84
+iv <- eval_inline(ex, envir = environment())
+check("eval_inline values", identical(iv$value[1:2], c("84", "94")))
+check("eval_inline records errors", iv$error[3] && startsWith(iv$value[3], "ERROR: "))
+
 cat(if (failures == 0L) "PASS\n" else sprintf("%d FAILED\n", failures))
 quit(status = if (failures == 0L) 0L else 1L)

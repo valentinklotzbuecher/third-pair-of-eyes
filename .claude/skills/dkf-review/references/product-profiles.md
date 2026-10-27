@@ -41,7 +41,9 @@ Fields left empty in the template are recorded as empty, not guessed.
   numbers (no patient data are needed).
 - **Core modules**: `sample-size-diagnostics`; `simulation-diagnostics` when the
   calculation simulates; `estimand-diagnostics` (light pass: the estimand the effect
-  refers to and the intercurrent events the calculation ignores);
+  refers to and the intercurrent events the calculation ignores); `rct-diagnostics`
+  for a randomised design (the randomisation the calculation and analysis assume);
+  `missing-data-diagnostics` (light pass: what the dropout allowance assumes);
   `time-to-event-diagnostics` for event-driven designs; `small-n-diagnostics` when the
   target is below about 50 evaluable participants per arm or 40 clusters.
 - **Out of scope**: the full analysis plan; the completeness of the protocol.

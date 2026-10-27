@@ -13,7 +13,7 @@ change, a printed number or what a reader understands.
 | `eval: false` | Is any number, table or statement in the text produced by this chunk, or by an earlier run of it? A results table from an unevaluated chunk, or a value copied from one into prose, is not reproducible from the document. |
 | `include: false`, `echo: false` | Harmless for display; check that hidden chunks computing reported numbers are in the specification map. |
 | `error: true` | The document renders through errors; search the rendered output for error text and check that no reported number comes from a failed chunk. |
-| `warning: false`, `message: false` | Around model fits, simulations or package loading, these hide convergence, singularity, separation and version warnings. Re-run the chunk with warnings visible and record what it prints. |
+| `warning: false`, `message: false` | Around model fits, simulations or package loading, these hide convergence, singularity, separation and version warnings. Re-run with warnings visible (`options(warn = 1)` set in a profile through `R_PROFILE_USER`, which chunk options do not override) and record what it prints. |
 | `cache: true` | Cached chunks do not re-run when upstream data or code change unless `dependson`/`cache.extra` say so; a stale cache can print numbers the current code no longer computes. Re-render with the cache cleared. |
 | `freeze` (project option) | Frozen computations are reused across renders; check the freeze is current with the source. |
 | `output: asis` | Generated markdown; check the generating code, not only its output. |

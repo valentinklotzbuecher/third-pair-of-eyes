@@ -99,7 +99,7 @@ ENUM = {
     "state": {"done", "nonreproduced", "proxy", "blocked", "data_not_shared",
               "not_run", "not_applicable"},
     "validity": {"clean", "unvalidated", "invalid"},
-    "row_role": {"verdict-bearing", "rebuttal"},
+    "row_role": {"verdict-bearing", "rebuttal", "harness"},
     "data_mode": {"none", "synthetic", "shared"},
     "warrant": {"sourced", "derived", "contested", "transported", "unanchored", "convenience"},
     "kind": {"result", "calculation", "assumption", "specification", "interpretation"},
@@ -261,32 +261,50 @@ def check_document(g, assign):
 
 
 def module_walk(g, depth):
-    """{module: 'fired'|'not applicable'|'not run'} from module-walk.md."""
+    """{module: 'fired'|'not applicable'|'not run'} from module-walk.md: a table
+    `| Module | Decision | Condition and evidence |` (or list items `- <module>:
+    <decision> — <evidence>`), the decision read from its own cell, never from the
+    evidence text."""
     rel = f"{ACD}/module-walk.md"
     if not g.exists(rel):
         g.fail("C6", f"{rel} is missing.")
         return {}
     text = open(g.path(rel), encoding="utf-8").read()
+    decisions = {}
+    for line in text.splitlines():
+        cells = None
+        if line.strip().startswith("|"):
+            cells = [c.strip().strip("`").strip() for c in line.strip().strip("|").split("|")]
+        else:
+            lm = re.match(r"^\s*[-*]\s+`?([a-z-]+)`?\s*:\s*(.+)$", line)
+            if lm:
+                cells = [lm.group(1), re.split(r"\s+[—–(-]\s*|\s*\(", lm.group(2), maxsplit=1)[0]]
+        if not cells or len(cells) < 2 or cells[0] not in MODULES:
+            continue
+        d = re.sub(r"[\s_]+", " ", cells[1].strip().lower())
+        if d.startswith("fired"):
+            decisions[cells[0]] = "fired"
+        elif d.startswith(("not applicable", "n/a")):
+            decisions[cells[0]] = "not applicable"
+        elif d.startswith("not run"):
+            decisions[cells[0]] = "not run"
+        else:
+            decisions[cells[0]] = "unknown:" + cells[1][:40]
     out = {}
     for m in MODULES:
-        lines = [ln for ln in text.splitlines() if m in ln]
-        if not lines:
-            g.fail("C6", f"{rel} does not mention {m}: every module gets a fired or "
-                         "not-fired line.")
+        state = decisions.get(m)
+        if state is None:
+            g.fail("C6", f"{rel} has no row for {m}: every module gets a row "
+                         "`| <module> | <decision> | <evidence> |`.")
             continue
-        joined = " ".join(lines).lower()
-        if re.search(r"not[ _-]?run", joined):
-            out[m] = "not run"
-            if depth != "quick":
-                g.fail("C6", f"{m} is marked NOT_RUN at depth {depth}: only depth quick skips "
-                             "modules.")
-        elif re.search(r"not[ _-]?applicable|not fired|n/a", joined):
-            out[m] = "not applicable"
-        elif re.search(r"\bfired\b", joined):
-            out[m] = "fired"
-        else:
-            g.fail("C6", f"{rel}: cannot tell whether {m} fired; write `fired` or "
-                         "`not applicable`.")
+        if state.startswith("unknown:"):
+            g.fail("C6", f"{rel}: decision for {m} is {state[8:]!r}; write `fired`, "
+                         "`not applicable` or `not run — depth quick`.")
+            continue
+        if state == "not run" and depth != "quick":
+            g.fail("C6", f"{m} is marked not run at depth {depth}: only depth quick skips "
+                         "modules.")
+        out[m] = state
     for m, state in out.items():
         rep = f"{ACD}/{m}-REPORT.md"
         if state == "fired":

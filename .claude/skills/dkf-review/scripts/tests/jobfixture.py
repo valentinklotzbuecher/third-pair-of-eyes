@@ -80,10 +80,10 @@ The sample size is `r 100` participants.
 """
 
 MODULE_WALK = "\n".join(
-    ["# Module walk", ""] +
-    [f"- sample-size-diagnostics: fired (target N stated)",
-     f"- simulation-diagnostics: fired (simulated power)"] +
-    [f"- {m}: not applicable (no such feature)" for m in (
+    ["# Module walk", "", "| Module | Decision | Condition and evidence |", "|---|---|---|",
+     "| sample-size-diagnostics | fired | target N stated |",
+     "| simulation-diagnostics | fired | simulated power; the plan/analysis is not run here |"] +
+    [f"| {m} | not applicable | no such feature |" for m in (
         "estimand-diagnostics", "rct-diagnostics", "missing-data-diagnostics",
         "time-to-event-diagnostics", "multiplicity-diagnostics",
         "regression-model-diagnostics", "observational-diagnostics",

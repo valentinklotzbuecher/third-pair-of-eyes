@@ -102,14 +102,14 @@ def test_fired_module_with_stub_fails(job, capsys):
 
 def test_not_run_module_only_at_quick_depth(job, capsys):
     edit(os.path.join(job, "analysis/code-and-data/module-walk.md"),
-         "- small-n-diagnostics: not applicable (no such feature)",
-         "- small-n-diagnostics: NOT_RUN — depth quick")
+         "| small-n-diagnostics | not applicable | no such feature |",
+         "| small-n-diagnostics | not run — depth quick | quick |")
     code, out = gate(job, "code-and-data", capsys)
     assert code == 1 and "only depth quick skips" in out
     j2 = make_job(os.path.join(os.path.dirname(job), "quick"), depth="quick")
     edit(os.path.join(j2, "analysis/code-and-data/module-walk.md"),
-         "- small-n-diagnostics: not applicable (no such feature)",
-         "- small-n-diagnostics: NOT_RUN — depth quick")
+         "| small-n-diagnostics | not applicable | no such feature |",
+         "| small-n-diagnostics | not run — depth quick | quick |")
     assert gate(j2, "code-and-data", capsys)[0] == 0
 
 
@@ -228,3 +228,26 @@ def test_fired_module_report_needs_sections(job, capsys):
           "# Simulation\n\n## Status\n\nCOMPLETE\n\n## Findings\n\nNone.\n")
     code, out = gate(job, "code-and-data", capsys)
     assert code == 1 and "simulation-diagnostics-REPORT.md has no `## Coverage`" in out
+
+
+def test_module_walk_reads_the_decision_cell_only(job, capsys):
+    # "not run here" and "plan/analysis" in the evidence text do not change the decision
+    code, out = gate(job, "code-and-data", capsys)
+    assert code == 0, out
+
+
+def test_module_walk_list_format_and_unknown_decision(job, capsys):
+    p = os.path.join(job, "analysis/code-and-data/module-walk.md")
+    edit(p, "| bayesian-diagnostics | not applicable | no such feature |",
+         "- bayesian-diagnostics: not applicable — no priors")
+    assert gate(job, "code-and-data", capsys)[0] == 0
+    edit(p, "| observational-diagnostics | not applicable |", "| observational-diagnostics | maybe |")
+    code, out = gate(job, "code-and-data", capsys)
+    assert code == 1 and "decision for observational-diagnostics is 'maybe'" in out
+
+
+def test_module_walk_missing_row(job, capsys):
+    p = os.path.join(job, "analysis/code-and-data/module-walk.md")
+    edit(p, "| prediction-model-diagnostics | not applicable | no such feature |\n", "")
+    code, out = gate(job, "code-and-data", capsys)
+    assert code == 1 and "no row for prediction-model-diagnostics" in out

@@ -16,8 +16,11 @@ structure, link and summary. Each can be specified correctly in the text and
 implemented differently in the code, and each can change what the coefficient means.
 
 Trigger: any load-bearing estimate from a linear, generalised linear, mixed (MMRM),
-GEE, ordinal, count or ANCOVA model. `NOT_APPLICABLE` when every load-bearing result is
-an unadjusted comparison; name them.
+GEE, ordinal, count or ANCOVA model, and the planned primary analysis of a protocol or
+SAP when it is such a model. In an SSE, whether the calculation's test matches the
+planned model belongs to `sample-size-diagnostics`; this module fires for an SSE only
+when the review simulates or fits the planned model itself. `NOT_APPLICABLE` when
+every load-bearing result is an unadjusted comparison; name them.
 
 ## Core checks
 

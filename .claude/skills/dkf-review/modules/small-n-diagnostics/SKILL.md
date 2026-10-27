@@ -18,9 +18,10 @@ looking interval may owe its precision to a large-sample approximation that does
 hold. The checks put numbers on both directions. Adapted from the upstream
 `small-n-diagnostics` module, for R and clinical designs.
 
-Trigger: few participants (as a rule of thumb, fewer than about 50 per arm), few
-clusters or centres (fewer than about 40), a pilot or feasibility study, or a null or
-near-null result that the product interprets. `NOT_APPLICABLE` when the design has
+Trigger: few participants (as a rule of thumb, fewer than about 50 evaluable
+participants per arm at the planned or achieved size), few clusters or centres (fewer
+than about 40), a pilot or feasibility study, or a null or near-null result that the
+product interprets. `NOT_APPLICABLE` when the design has
 ample units and no null carries weight.
 
 ## Core checks

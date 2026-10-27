@@ -90,9 +90,13 @@ core modules and what is out of scope.
    the exact evidence). A check that the product's own materials make impossible (a
    planning value with no source, a source named only in a code comment or in a file
    that was not delivered, a saved result with no code that made it, an analysis the
-   text names but never specifies) is *unverifiable as delivered*: a finding. A check the review could not run because of its own limits (patient data
-   not shared under the job's data mode, a cited source it could not obtain) is
-   `unverified-here`: a limit on the review, never a finding against the product.
+   text names but never specifies) is *unverifiable as delivered*: a finding. A saved
+   result that was not delivered but whose generating code is in the source is
+   regenerated, not a finding. A check the review could not run because of its own
+   limits (patient data not shared under the job's data mode, a cited source it could
+   not obtain, an exact value its environment cannot reproduce, such as other package
+   versions or parallel streams) is `unverified-here`: a limit on the review, never a
+   finding against the product.
    Status rolls up: one `INTERIM` check makes its stage `INTERIM`, and one `INTERIM`
    stage report or ledger row makes the run `INTERIM`.
 8. **A check counted for or against the product must be able to count.** Before a
@@ -216,7 +220,7 @@ request in its report; the coordinator relays it.
 │   │                   sensitivity-claims.csv · sap-adherence.csv (reports and manuscripts) ·
 │   │                   drift-table.md (when earlier versions exist)
 │   ├── code-and-data/  spec-map.csv · feasibility-matrix.csv · construction-ledger.md ·
-│   │                   battery-manifest.csv · results.csv · data-findings.csv ·
+│   │                   battery-manifest.csv · results.csv · data-findings.csv (shared) ·
 │   │                   assumption-ledger.csv (SSE) · module-walk.md · <module>-REPORT.md
 │   └── statements/     statement-ledger.csv · questions.csv · driver-matrix.csv
 ├── work/          pkg/ (working copy of 01_product) · synthetic/ · scripts/ · logs/ ·

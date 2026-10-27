@@ -67,9 +67,9 @@ changes.
 The clinical modules `estimand`, `missing-data`, `time-to-event`, `multiplicity`,
 `regression-model`, `prediction-model` and `bayesian`; the references
 `product-profiles.md`, `data-access.md`, `clinical-guidelines.md`, `estimands.md`,
-`quarto-r-audit.md`, `r-traps.md`, `worked-cases.md`; the assignment template, the
+`quarto-r-audit.md`, `r-traps.md`, `worked-cases.md`; the assignment, intake, agents and progress templates, the
 consistency matrix, arithmetic checks, SAP adherence, specification map, assumption
-ledger and questions templates, and `recompute.R`; `jobfiles.py`, `scan_job.py`,
+ledger and questions templates, `recompute.R` and `inline_values.R`; `jobfiles.py`, `scan_job.py`,
 `new_job.py`; the whole `dkf-synthetic-data` skill; `issues.py` and
 `annotate_source.py`.
 

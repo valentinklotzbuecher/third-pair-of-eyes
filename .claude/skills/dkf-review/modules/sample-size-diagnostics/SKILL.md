@@ -40,10 +40,14 @@ product. `NOT_APPLICABLE` when the product states none.
   correction, Monte Carlo error) is agreement; anything else is traced to its cause
   before it is written up: a different input, a different test, units, sidedness, a
   rounding step.
-- **Planning values and their warrant.** Every input goes to
-  `analysis/code-and-data/assumption-ledger.csv` (template
-  `../../assets/assumption-ledger.csv`): `id | assumption | value | location | source_cited
-  | source_checked | warrant | effect_on_N | artifact | note`. Open each cited source
+- **Planning values and their warrant.** The code-and-data stage enters every planning
+  value in `analysis/code-and-data/assumption-ledger.csv` (template
+  `../../assets/assumption-ledger.csv`: `id | assumption | value | location |
+  source_cited | source_checked | warrant | effect_on_N | artifact | note`); this
+  module completes `source_checked`, `warrant` and `effect_on_N` for every row and adds
+  any value the stage missed. Conventions (alpha, power, sidedness, allocation ratio,
+  rounding rule) are design choices, not planning values: they belong in the
+  construction ledger. Open each cited source
   (`../../references/source-protocol.md`) and grade the warrant:
   - `SOURCED`: the source reports the value for a comparable population, endpoint,
     intervention and time frame;
