@@ -225,8 +225,9 @@ every check that produced a number, with the printed value beside it where one e
    its report and run the gate. Each module agent writes its own report, puts its leads
    under that report's `## Leads for later stages`, keeps scripts and logs in
    `work/scripts/` and `work/logs/` with names prefixed by the module, and appends its
-   rows to `results.csv` and `battery-manifest.csv` under a file lock, in the stage's
-   column order. Once modules have appended, no builder regenerates a shared ledger
+   rows to `results.csv` and `battery-manifest.csv` under a file lock
+   (`flock analysis/code-and-data/.ledger.lock -c '<append command>'`), in the stage's
+   column order, with IDs prefixed by the module's report prefix. Once modules have appended, no builder regenerates a shared ledger
    from scratch.
 
    Simulation and resampling loops follow `../references/simulation-harness.md`.

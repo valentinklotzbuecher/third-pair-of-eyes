@@ -87,7 +87,8 @@ products before routine use.
   optionally `mistune` for HTML rendering.
 - R with the packages the product uses (the review records any version difference
   from the product's `groundhog` date or `renv.lock`); Quarto if available.
-- Poppler's `pdftotext` and `pdfinfo`.
+- Poppler's `pdftotext`, `pdfinfo`, `pdftoppm` and `pdftocairo` (text, metadata,
+  page images, and figure values read from the PDF's vector graphics).
 
 ## Repository layout
 
