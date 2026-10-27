@@ -1,8 +1,21 @@
-# API Keys and secrets
+# API keys and secrets
 .Renviron
 .env
 *.key
 credentials.json
+key/
+
+# Review jobs hold the documents under review (and possibly cleared data):
+# they never go into git. Only the README that explains the folder is tracked.
+jobs/*
+!jobs/README.md
+
+# Patient-level data, wherever it lands
+*.sas7bdat
+*.sav
+*.dta
+*.xpt
+*.parquet
 
 # R artifacts
 .Rhistory
@@ -10,43 +23,37 @@ credentials.json
 .RData
 .Ruserdata
 *.Rproj.user/
+.Rproj.user/
 
 # Python cache
 __pycache__/
 *.py[cod]
 *$py.class
-.Python
-*.so
+.pytest_cache/
 
-# Quarto render artifacts (keep final outputs, ignore intermediate)
+# Quarto render artifacts
 *_files/
 *_cache/
 .quarto/
-review_prototype.html
-review_prototype.pdf
 
-# OS files
+# Archived prototype: local inputs and run records
+archive/2026_api_prototype/review_examples/*.pdf
+archive/2026_api_prototype/review_examples/dat/
+archive/2026_api_prototype/review_results/prototype_jobs/
+archive/2026_api_prototype/review_results/prototype_runs/
+archive/2026_api_prototype/review_prototype.html
+archive/2026_api_prototype/review_prototype.pdf
+
+# OS and editor files
 .DS_Store
 .DS_Store?
 ._*
 Thumbs.db
-
-# IDE
 .idea/
 .vscode/
 *.swp
 *.swo
 *~
-
-# Sensitive documents - be careful with patient data
-# Uncomment if needed:
-review_examples/*.pdf
-# review_examples/*.qmd
-
-# Local review run artifacts
-review_results/prototype_jobs/
-review_results/prototype_runs/
-review_examples/dat/
 
 # Temporary files
 *.tmp
@@ -54,4 +61,3 @@ review_examples/dat/
 *.log
 *.aux
 *.toc
-*.tex
