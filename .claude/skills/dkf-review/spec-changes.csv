@@ -1,0 +1,2 @@
+id,version,date,kind,scope,requirement,source,removed,note
+R001,0.1.0,2026-10-27,baseline,dkf-review,"Requirement history begins: everything in the suite at 0.1.0 is the baseline. The suite derives from research_skills 0.9.1 (isitcredible/research_skills@766f28f); upstream requirement rows R001-R533 are not carried over, and a run made with the upstream suite is not a dkf-review run.",dkf-review/SKILL.md,,

@@ -1,0 +1,478 @@
+#!/usr/bin/env python3
+"""check_job.py — the dkf-review gate: assert that a stage's artifacts exist and are
+checkable facts.
+
+    python3 check_job.py --root <job> [--stage document|code-and-data|statements|
+                                       challenge|verdict|all]
+
+A stage is not COMPLETE until its gate passes. Standard library only; reads only the
+review's own artifacts and 00_ASSIGNMENT.md, never a data file.
+
+document
+  D1  review/document-REPORT.md has `## Status` and `## Findings`.
+  D2  analysis/document/consistency-matrix.csv: required columns, at least one row,
+      `status` in {consistent, differs, missing-in-product, missing-elsewhere,
+      not-applicable}, `evidence` filled.
+  D3  analysis/document/arithmetic-checks.csv: required columns, at least one row;
+      `result` in {match, rounding, mismatch, NONE_FOUND}; every non-NONE_FOUND row
+      names a `script` that exists; NONE_FOUND only as the single row.
+  D4  analysis/document/sensitivity-claims.csv: `classification` in {SUPPORTED,
+      QUALIFIED, CONTRADICTED, UNRESOLVED, NONE_FOUND}, `evidence` filled,
+      NONE_FOUND only as the single row; a header-only file FAILs.
+  D5  report and manuscript products: analysis/document/sap-adherence.csv with rows,
+      `status` in {performed as specified, performed with deviation, omitted, post hoc}.
+code-and-data
+  C1  review/code-and-data-REPORT.md has `## Status` and `## Findings`.
+  C2  analysis/code-and-data/spec-map.csv: rows; `status` in {identical, differs,
+      not-implemented, no-code}; `identical`/`differs` rows carry a `code_ref`
+      of the form file:line.
+  C3  feasibility-matrix.csv and construction-ledger.md exist and are not empty.
+  C4  battery-manifest.csv: columns, enums (`state`, `validity`, `row_role`,
+      `data_mode`); `data_mode` never above the assignment's mode (`shared` rows need
+      mode shared; `synthetic` rows need mode synthetic or shared); artifact-bearing
+      states (done, NONREPRODUCED, PROXY) name an existing artifact.
+  C5  results.csv: columns; every artifact-bearing manifest row has a results row
+      (by spec_id = id, or by artifact); rows with data_mode `synthetic` carry no
+      `printed_value` (a synthetic run is never compared with a printed number);
+      NONREPRODUCED needs a printed value.
+  C6  module-walk.md exists; every module it marks fired has a report under
+      analysis/code-and-data/ that is not a NOT_APPLICABLE stub; every module marked
+      not applicable has its stub. At depth `quick`, `NOT_RUN — depth quick` rows are
+      accepted.
+  C7  sample-size-diagnostics fired → assumption-ledger.csv with rows, `warrant` in
+      {SOURCED, DERIVED, CONTESTED, TRANSPORTED, UNANCHORED, CONVENIENCE},
+      `effect_on_N` filled for every row not SOURCED.
+statements
+  S1  review/statements-REPORT.md has a table with `Centrality` and `Holds` columns.
+  S2  analysis/statements/statement-ledger.csv: columns; unique `ST` IDs; enums for
+      kind, centrality, holds, status; kernel and evidence filled; not_established
+      filled unless holds = holds; at least one primary row.
+  S3  analysis/statements/questions.csv has one row per assignment question, `status`
+      in {answered, partly answered, cannot be answered from the materials}.
+challenge (depth standard and full only)
+  X1  review/challenge-REPORT*.md exists with sections (a) to (g).
+verdict
+  V1  SYNTHESIS.md: title, header line `Verification: <word> · <n> not established /
+      <n> narrower / <n> hold` matching the ledger counts; the required sections in
+      order; the statement-ledger table carries every ledger ID, with valid Holds;
+      every `### F` finding has `bears on:`, `where:` (text | code | text and code |
+      unresolved), `evidence:` and `fix:`; one `### Q` block per question.
+
+Exit 0 on PASS, 1 on FAIL. WARN lines do not change the exit code.
+"""
+import argparse
+import glob
+import os
+import re
+import sys
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import jobfiles as jf  # noqa: E402
+
+AD = "analysis/document"
+ACD = "analysis/code-and-data"
+AST = "analysis/statements"
+
+MODULES = ("sample-size-diagnostics", "simulation-diagnostics", "estimand-diagnostics",
+           "rct-diagnostics", "missing-data-diagnostics", "time-to-event-diagnostics",
+           "multiplicity-diagnostics", "regression-model-diagnostics",
+           "observational-diagnostics", "prediction-model-diagnostics",
+           "bayesian-diagnostics", "small-n-diagnostics")
+
+ENUM = {
+    "consistency_status": {"consistent", "differs", "missing-in-product",
+                           "missing-elsewhere", "not-applicable"},
+    "arith_result": {"match", "rounding", "mismatch", "none_found"},
+    "sens_class": {"supported", "qualified", "contradicted", "unresolved", "none_found"},
+    "sap_status": {"performed as specified", "performed with deviation", "omitted", "post hoc"},
+    "spec_status": {"identical", "differs", "not-implemented", "no-code"},
+    "state": {"done", "nonreproduced", "proxy", "blocked", "data_not_shared",
+              "not_run", "not_applicable"},
+    "validity": {"clean", "unvalidated", "invalid"},
+    "row_role": {"verdict-bearing", "rebuttal"},
+    "data_mode": {"none", "synthetic", "shared"},
+    "warrant": {"sourced", "derived", "contested", "transported", "unanchored", "convenience"},
+    "kind": {"result", "calculation", "assumption", "specification", "interpretation"},
+    "centrality": {"primary", "supporting", "peripheral"},
+    "holds": {"holds", "narrower", "not established"},
+    "status": {"settled", "interim", "untested", "unverifiable", "unverified-here"},
+    "q_status": {"answered", "partly answered", "cannot be answered from the materials"},
+    "where": {"text", "code", "text and code", "unresolved"},
+}
+ARTIFACT_STATES = {"done", "nonreproduced", "proxy"}
+MODE_RANK = {"none": 0, "synthetic": 1, "shared": 2}
+
+SYNTHESIS_SECTIONS = [
+    "Status", "What the product establishes and what it does not", "Cross-cutting findings",
+    "Statement ledger", "Recomputation table", "Answers to the assignment questions",
+    "Data and reproducibility", "Findings", "Limits of this review", "Counts",
+]
+HEADER = re.compile(r"^Verification:\s*(\w+)\s*·\s*(\d+)\s+not established\s*/\s*(\d+)\s+narrower"
+                    r"\s*/\s*(\d+)\s+holds?\s*$")
+
+
+class Gate:
+    def __init__(self, root):
+        self.root = root
+        self.fails, self.warns = [], []
+
+    def fail(self, code, msg):
+        self.fails.append(f"{code} {msg}")
+
+    def warn(self, code, msg):
+        self.warns.append(f"{code} {msg}")
+
+    def path(self, rel):
+        return os.path.join(self.root, rel)
+
+    def exists(self, rel):
+        return os.path.exists(self.path(rel))
+
+    def csv(self, code, rel, required, min_rows=1):
+        cols, rows = jf.load_csv(self.path(rel))
+        if cols is None:
+            self.fail(code, f"{rel} is missing.")
+            return None
+        missing = [c for c in required if c not in cols]
+        if missing:
+            self.fail(code, f"{rel} lacks columns: {', '.join(missing)}.")
+            return None
+        if len(rows) < min_rows:
+            self.fail(code, f"{rel} has no rows: a header-only file cannot be told from a "
+                            "skipped step.")
+            return None
+        return rows
+
+    def enum(self, code, rel, rows, col, key, allow_blank=False):
+        for i, r in enumerate(rows, 2):
+            v = (r.get(col) or "").strip().lower()
+            if not v and allow_blank:
+                continue
+            if v not in ENUM[key]:
+                self.fail(code, f"{rel} line {i}: {col} = {r.get(col)!r}; expected one of "
+                                f"{', '.join(sorted(ENUM[key]))}.")
+
+    def report(self, code, rel, sections=("Status", "Findings")):
+        if not self.exists(rel):
+            self.fail(code, f"{rel} is missing.")
+            return None
+        titles = {t.strip().lower() for _, t, _ in jf.md_sections(self.path(rel))}
+        for s in sections:
+            if s.lower() not in titles:
+                self.fail(code, f"{rel} has no `## {s}` section.")
+        return open(self.path(rel), encoding="utf-8").read()
+
+
+def none_found_rule(g, code, rel, rows, col):
+    nf = [r for r in rows if (r.get(col) or "").strip().upper() == "NONE_FOUND"]
+    if nf and len(rows) > 1:
+        g.fail(code, f"{rel}: NONE_FOUND appears beside other rows.")
+    return bool(nf)
+
+
+def check_document(g, assign):
+    g.report("D1", "review/document-REPORT.md")
+    rel = f"{AD}/consistency-matrix.csv"
+    rows = g.csv("D2", rel, ["element", "product", "status", "evidence"])
+    if rows:
+        g.enum("D2", rel, rows, "status", "consistency_status")
+        for i, r in enumerate(rows, 2):
+            if not (r.get("evidence") or "").strip():
+                g.fail("D2", f"{rel} line {i}: evidence is empty.")
+    rel = f"{AD}/arithmetic-checks.csv"
+    rows = g.csv("D3", rel, ["id", "location", "printed", "recomputed", "script", "result"])
+    if rows:
+        g.enum("D3", rel, rows, "result", "arith_result")
+        if not none_found_rule(g, "D3", rel, rows, "result"):
+            for i, r in enumerate(rows, 2):
+                s = (r.get("script") or "").strip()
+                if not s or not g.exists(s.split(":")[0]):
+                    g.fail("D3", f"{rel} line {i}: script {s!r} does not exist under the job.")
+    rel = f"{AD}/sensitivity-claims.csv"
+    rows = g.csv("D4", rel, ["claim", "classification", "evidence"])
+    if rows:
+        g.enum("D4", rel, rows, "classification", "sens_class")
+        none_found_rule(g, "D4", rel, rows, "classification")
+        for i, r in enumerate(rows, 2):
+            if not (r.get("evidence") or "").strip():
+                g.fail("D4", f"{rel} line {i}: evidence is empty.")
+    if jf.product_type(assign) in ("report", "manuscript"):
+        rel = f"{AD}/sap-adherence.csv"
+        rows = g.csv("D5", rel, ["analysis", "status"])
+        if rows:
+            g.enum("D5", rel, rows, "status", "sap_status")
+
+
+def module_walk(g, depth):
+    """{module: 'fired'|'not applicable'|'not run'} from module-walk.md."""
+    rel = f"{ACD}/module-walk.md"
+    if not g.exists(rel):
+        g.fail("C6", f"{rel} is missing.")
+        return {}
+    text = open(g.path(rel), encoding="utf-8").read()
+    out = {}
+    for m in MODULES:
+        lines = [ln for ln in text.splitlines() if m in ln]
+        if not lines:
+            g.fail("C6", f"{rel} does not mention {m}: every module gets a fired or "
+                         "not-fired line.")
+            continue
+        joined = " ".join(lines).lower()
+        if re.search(r"not[ _-]?run", joined):
+            out[m] = "not run"
+            if depth != "quick":
+                g.fail("C6", f"{m} is marked NOT_RUN at depth {depth}: only depth quick skips "
+                             "modules.")
+        elif re.search(r"not[ _-]?applicable|not fired|n/a", joined):
+            out[m] = "not applicable"
+        elif re.search(r"\bfired\b", joined):
+            out[m] = "fired"
+        else:
+            g.fail("C6", f"{rel}: cannot tell whether {m} fired; write `fired` or "
+                         "`not applicable`.")
+    for m, state in out.items():
+        rep = f"{ACD}/{m}-REPORT.md"
+        if state == "fired":
+            if not g.exists(rep) or os.path.getsize(g.path(rep)) == 0:
+                g.fail("C6", f"{m} fired but {rep} is missing or empty.")
+            elif re.search(r"^Status:\s*NOT_APPLICABLE", open(g.path(rep), encoding="utf-8").read(),
+                           re.M):
+                g.fail("C6", f"{m} fired but its report is a NOT_APPLICABLE stub.")
+        elif state == "not applicable" and not g.exists(rep):
+            g.fail("C6", f"{m} is not applicable but has no stub at {rep} "
+                         "(`Status: NOT_APPLICABLE — <reason>`).")
+    return out
+
+
+def check_code_and_data(g, assign):
+    mode = jf.data_mode(assign) or "none"
+    depth = jf.depth(assign)
+    g.report("C1", "review/code-and-data-REPORT.md")
+    rel = f"{ACD}/spec-map.csv"
+    rows = g.csv("C2", rel, ["printed_ref", "element", "printed_value", "code_ref", "status"])
+    if rows:
+        g.enum("C2", rel, rows, "status", "spec_status")
+        for i, r in enumerate(rows, 2):
+            if (r.get("status") or "").strip().lower() in ("identical", "differs") and \
+                    not re.search(r"\S+:\d+", r.get("code_ref") or ""):
+                g.fail("C2", f"{rel} line {i}: code_ref {r.get('code_ref')!r} is not file:line.")
+    for rel in (f"{ACD}/feasibility-matrix.csv", f"{ACD}/construction-ledger.md"):
+        if not g.exists(rel) or os.path.getsize(g.path(rel)) == 0:
+            g.fail("C3", f"{rel} is missing or empty.")
+    rel = f"{ACD}/battery-manifest.csv"
+    man = g.csv("C4", rel, ["id", "family", "hypothesis", "spec", "data_mode", "artifact",
+                            "seed", "state", "validity", "row_role"])
+    if man:
+        for col, key in (("state", "state"), ("validity", "validity"),
+                         ("row_role", "row_role"), ("data_mode", "data_mode")):
+            g.enum("C4", rel, man, col, key)
+        for i, r in enumerate(man, 2):
+            dm = (r.get("data_mode") or "").strip().lower()
+            if dm in MODE_RANK and MODE_RANK[dm] > MODE_RANK.get(mode, 0):
+                g.fail("C4", f"{rel} line {i}: a `{dm}` check in a job whose data mode is `{mode}`.")
+            st = (r.get("state") or "").strip().lower()
+            art = (r.get("artifact") or "").strip()
+            if st in ARTIFACT_STATES:
+                if not art or art.upper() == "NA":
+                    g.fail("C4", f"{rel} line {i}: state {st} needs an artifact.")
+                else:
+                    for a in re.split(r"[;,]\s*", art):
+                        if a and not g.exists(a):
+                            g.fail("C4", f"{rel} line {i}: artifact {a} does not exist.")
+            if not (r.get("seed") or "").strip():
+                g.fail("C4", f"{rel} line {i}: seed is blank (write NA for deterministic checks).")
+    rel = f"{ACD}/results.csv"
+    res = g.csv("C5", rel, ["spec_id", "data_mode", "printed_value", "estimate", "state",
+                            "artifact"], min_rows=0)
+    if res is not None and man:
+        ids = {(r.get("spec_id") or "").strip() for r in res}
+        arts = {(r.get("artifact") or "").strip() for r in res}
+        for r in man:
+            if (r.get("state") or "").strip().lower() in ARTIFACT_STATES:
+                if r["id"].strip() not in ids and (r.get("artifact") or "").strip() not in arts:
+                    g.fail("C5", f"manifest row {r['id']} ({r['state']}) has no results.csv row.")
+        for i, r in enumerate(res, 2):
+            dm = (r.get("data_mode") or "").strip().lower()
+            if dm == "synthetic" and (r.get("printed_value") or "").strip():
+                g.fail("C5", f"{rel} line {i}: a synthetic-data result carries a printed value; "
+                             "synthetic runs are never compared with printed numbers.")
+            if (r.get("state") or "").strip().lower() == "nonreproduced" and \
+                    not (r.get("printed_value") or "").strip():
+                g.fail("C5", f"{rel} line {i}: NONREPRODUCED without the printed value.")
+    walk = module_walk(g, depth)
+    if walk.get("sample-size-diagnostics") == "fired":
+        rel = f"{ACD}/assumption-ledger.csv"
+        rows = g.csv("C7", rel, ["id", "assumption", "value", "source_cited", "warrant",
+                                 "effect_on_N"])
+        if rows:
+            g.enum("C7", rel, rows, "warrant", "warrant")
+            for i, r in enumerate(rows, 2):
+                if (r.get("warrant") or "").strip().lower() != "sourced" and \
+                        not (r.get("effect_on_N") or "").strip():
+                    g.fail("C7", f"{rel} line {i}: effect_on_N is empty for a planning value "
+                                 "that is not SOURCED.")
+
+
+def ledger_rows(g, code="S2"):
+    rel = f"{AST}/statement-ledger.csv"
+    return rel, g.csv(code, rel, ["row_id", "kind", "statement", "location", "centrality",
+                                  "holds", "kernel", "not_established", "strongest_defence",
+                                  "status", "evidence"])
+
+
+def check_statements(g, assign):
+    text = g.report("S1", "review/statements-REPORT.md", sections=("Status", "Findings"))
+    if text is not None:
+        ok = any(any(h.lower() == "centrality" for h in hdr) and any(h.lower() == "holds"
+                 for h in hdr) for hdr, _ in jf.md_tables(text))
+        if not ok:
+            g.fail("S1", "review/statements-REPORT.md has no table with Centrality and Holds "
+                         "columns.")
+    rel, rows = ledger_rows(g)
+    if rows:
+        for col in ("kind", "centrality", "holds", "status"):
+            g.enum("S2", rel, rows, col, col)
+        seen = set()
+        for i, r in enumerate(rows, 2):
+            rid = (r.get("row_id") or "").strip()
+            if not re.fullmatch(r"ST\d+", rid):
+                g.fail("S2", f"{rel} line {i}: row_id {rid!r} is not ST<number>.")
+            if rid in seen:
+                g.fail("S2", f"{rel} line {i}: duplicate row_id {rid}.")
+            seen.add(rid)
+            for col in ("statement", "kernel", "evidence"):
+                if not (r.get(col) or "").strip():
+                    g.fail("S2", f"{rel} line {i}: {col} is empty.")
+            if (r.get("holds") or "").strip().lower() in ("narrower", "not established") and \
+                    not (r.get("not_established") or "").strip():
+                g.fail("S2", f"{rel} line {i}: holds is {r['holds']} but not_established is empty.")
+        if not any((r.get("centrality") or "").strip().lower() == "primary" for r in rows):
+            g.fail("S2", f"{rel} has no primary row.")
+    questions = (assign or {}).get("questions", [])
+    rel = f"{AST}/questions.csv"
+    qrows = g.csv("S3", rel, ["q_id", "question", "answer", "basis", "status"],
+                  min_rows=0)
+    if qrows is not None:
+        if len(qrows) != len(questions):
+            g.fail("S3", f"{rel} has {len(qrows)} rows for {len(questions)} assignment questions.")
+        g.enum("S3", rel, qrows, "status", "q_status")
+
+
+def check_challenge(g, assign):
+    if jf.depth(assign) == "quick":
+        g.warn("X1", "depth quick: no challenge stage; the synthesis must say so.")
+        return
+    reports = sorted(glob.glob(g.path("review/challenge-REPORT*.md")))
+    if not reports:
+        g.fail("X1", "review/challenge-REPORT*.md is missing: without the challenge the run is "
+                     "INTERIM.")
+        return
+    for p in reports:
+        text = open(p, encoding="utf-8").read().lower()
+        for part in ("(a)", "(b)", "(c)", "(d)", "(e)", "(f)", "(g)"):
+            if part not in text:
+                g.fail("X1", f"{os.path.relpath(p, g.root)} lacks part {part}.")
+
+
+def check_verdict(g, assign):
+    rel = "SYNTHESIS.md"
+    if not g.exists(rel):
+        g.fail("V1", "SYNTHESIS.md is missing.")
+        return
+    text = open(g.path(rel), encoding="utf-8").read()
+    lines = text.splitlines()
+    if not lines or not lines[0].startswith("# Synthesis"):
+        g.fail("V1", "SYNTHESIS.md does not start with `# Synthesis — …`.")
+    header = next((ln.strip() for ln in lines[1:6] if ln.strip()), "")
+    hm = HEADER.match(header)
+    _, rows = ledger_rows(g, code="V1")
+    if not hm:
+        g.fail("V1", f"header line {header!r} is not `Verification: <word> · <n> not established "
+                     "/ <n> narrower / <n> hold`.")
+    elif rows:
+        counts = {h: sum(1 for r in rows if (r.get('holds') or '').strip().lower() == h)
+                  for h in ("not established", "narrower", "holds")}
+        printed = dict(zip(("not established", "narrower", "holds"), map(int, hm.group(2, 3, 4))))
+        if printed != counts:
+            g.fail("V1", f"header counts {printed} differ from the ledger's {counts}.")
+        if hm.group(1).upper() not in ("OPEN", "TRUSTWORTHY", "UNSOUND"):
+            g.fail("V1", f"Verification word {hm.group(1)!r} is not OPEN, TRUSTWORTHY or UNSOUND.")
+    titles = [(lvl, t.strip()) for lvl, t, _ in jf.md_sections(g.path(rel))]
+    h2 = [t for lvl, t in titles if lvl == 2]
+    pos = -1
+    for s in SYNTHESIS_SECTIONS:
+        if s not in h2:
+            g.fail("V1", f"SYNTHESIS.md lacks `## {s}`.")
+            continue
+        if h2.index(s) < pos:
+            g.fail("V1", f"`## {s}` is out of order.")
+        pos = h2.index(s)
+    tables = jf.md_tables(text)
+    led = [t for t in tables if any(h.lower().startswith("statement") for h in t[0])
+           and any(h.lower() == "holds" for h in t[0])]
+    if not led:
+        g.fail("V1", "SYNTHESIS.md has no statement-ledger table with a Holds column.")
+    elif rows:
+        hdr, trows = led[0]
+        hi = [h.lower() for h in hdr].index("holds")
+        ids = set()
+        for tr in trows:
+            m = re.search(r"\b(ST\d+)\)?\s*$", tr[0]) or re.search(r"\b(ST\d+)\b", tr[0])
+            if m:
+                ids.add(m.group(1))
+            if hi < len(tr) and tr[hi].strip().lower() not in ENUM["holds"]:
+                g.fail("V1", f"statement-ledger table: Holds {tr[hi]!r} is not holds, narrower "
+                             "or not established.")
+        missing = [r["row_id"] for r in rows if r["row_id"].strip() not in ids]
+        if missing:
+            g.fail("V1", f"statement-ledger table lacks rows: {', '.join(missing)}.")
+    blocks = re.split(r"(?m)^### ", text)
+    for b in blocks[1:]:
+        title = b.splitlines()[0]
+        if not re.match(r"F\d+\.", title):
+            continue
+        for key in ("bears on:", "where:", "evidence:", "fix:"):
+            if key not in b.lower():
+                g.fail("V1", f"finding `{title[:60]}` lacks `{key}`.")
+        wm = re.search(r"(?im)^where:\s*(.+?)\s*$", b)
+        if wm and wm.group(1).strip().lower() not in ENUM["where"]:
+            g.fail("V1", f"finding `{title[:60]}`: where = {wm.group(1)!r}; expected text, code, "
+                         "text and code, or unresolved.")
+    nq = len((assign or {}).get("questions", []))
+    qb = len(re.findall(r"(?m)^### Q\d+\.", text))
+    if nq and qb != nq:
+        g.fail("V1", f"SYNTHESIS.md answers {qb} questions; the assignment asks {nq}.")
+
+
+STAGES = {
+    "document": check_document,
+    "code-and-data": check_code_and_data,
+    "statements": check_statements,
+    "challenge": check_challenge,
+    "verdict": check_verdict,
+}
+
+
+def main(argv=None):
+    ap = argparse.ArgumentParser(description="dkf-review stage gate")
+    ap.add_argument("--root", default=".")
+    ap.add_argument("--stage", default="all", choices=list(STAGES) + ["all"])
+    a = ap.parse_args(argv)
+    root = os.path.abspath(a.root)
+    assign = jf.read_assignment(root)
+    g = Gate(root)
+    if assign is None:
+        g.fail("A0", "00_ASSIGNMENT.md is missing.")
+    stages = list(STAGES) if a.stage == "all" else [a.stage]
+    for s in stages:
+        STAGES[s](g, assign)
+    for w in g.warns:
+        print(f"WARN {w}")
+    for f in g.fails:
+        print(f"FAIL {f}")
+    print("PASS" if not g.fails else f"FAIL ({len(g.fails)})")
+    return 0 if not g.fails else 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())
