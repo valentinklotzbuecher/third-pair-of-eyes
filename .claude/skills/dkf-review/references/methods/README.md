@@ -26,4 +26,4 @@ the methods apply to clinical studies. The clinical sources are in
 | `tosh_etal_2025_piranha.md` | many large effects on one outcome cannot all be true |
 
 To update them, copy the newer versions from upstream and record the version in
-`../../../../UPSTREAM.md`.
+`../../../UPSTREAM.md`.

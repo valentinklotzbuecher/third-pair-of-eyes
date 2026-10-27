@@ -70,8 +70,10 @@ Ground rules:
 
 ## B. Run the code
 
-Copy `01_product/` (and any `04_materials`-style inputs it reads) to `work/pkg/`. Run
-it unmodified first, then repair only what stops it running (rule 6 of the skill), with
+Copy `01_product/` (which holds every non-patient file the source reads) to
+`work/pkg/`; in data mode `shared`, the code reads patient data from `04_data/` through
+a path set in the working copy, never by copying the data into `work/`. Run it
+unmodified first, then repair only what stops it running (rule 6 of the skill), with
 every repair logged and diffed. Where Quarto is installed, render; otherwise extract
 the code with `knitr::purl(input, documentation = 0)` and run it with `Rscript`, and
 record which.
