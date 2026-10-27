@@ -2,19 +2,28 @@
 """check_job.py — the dkf-review gate: assert that a stage's artifacts exist and are
 checkable facts.
 
-    python3 check_job.py --root <job> [--stage document|code-and-data|statements|
-                                       challenge|verdict|all]
+    python3 check_job.py --root <job> [--stage intake|document|code-and-data|
+                                       statements|challenge|verdict|all]
 
 A stage is not COMPLETE until its gate passes. Standard library only; reads only the
 review's own artifacts and 00_ASSIGNMENT.md, never a data file.
 
+intake (also run by every later stage)
+  I1  00_INTAKE.md exists, records `Suite version:`, the data mode and the depth, and
+      numbers the assignment questions Q1, Q2, …; AGENTS.md and PROGRESS.md exist.
+      They are written before any stage work.
+stage reports (every stage report and module report)
+  R1  `## Status`, `## Findings`, `## Leads for later stages`, `## Scope assumptions`
+      and `## Coverage` sections; every `### <ID>. <title>` finding block carries
+      `bears on:` and `evidence:` lines (missing `where:` or `fix:` WARN).
 document
-  D1  review/document-REPORT.md has `## Status` and `## Findings`.
+  D1  review/document-REPORT.md passes R1.
   D2  analysis/document/consistency-matrix.csv: required columns, at least one row,
       `status` in {consistent, differs, missing-in-product, missing-elsewhere,
-      not-applicable}, `evidence` filled.
+      unverified-here, not-applicable}, `evidence` filled.
   D3  analysis/document/arithmetic-checks.csv: required columns, at least one row;
-      `result` in {match, rounding, mismatch, NONE_FOUND}; every non-NONE_FOUND row
+      `result` in {match, rounding, within-band, mismatch, NONE_FOUND}; a
+      `within-band` row states its band in `tolerance`; every non-NONE_FOUND row
       names a `script` that exists; NONE_FOUND only as the single row.
   D4  analysis/document/sensitivity-claims.csv: `classification` in {SUPPORTED,
       QUALIFIED, CONTRADICTED, UNRESOLVED, NONE_FOUND}, `evidence` filled,
@@ -22,7 +31,7 @@ document
   D5  report and manuscript products: analysis/document/sap-adherence.csv with rows,
       `status` in {performed as specified, performed with deviation, omitted, post hoc}.
 code-and-data
-  C1  review/code-and-data-REPORT.md has `## Status` and `## Findings`.
+  C1  review/code-and-data-REPORT.md and every fired module's report pass R1.
   C2  analysis/code-and-data/spec-map.csv: rows; `status` in {identical, differs,
       not-implemented, no-code}; `identical`/`differs` rows carry a `code_ref`
       of the form file:line.
@@ -43,7 +52,8 @@ code-and-data
       {SOURCED, DERIVED, CONTESTED, TRANSPORTED, UNANCHORED, CONVENIENCE},
       `effect_on_N` filled for every row not SOURCED.
 statements
-  S1  review/statements-REPORT.md has a table with `Centrality` and `Holds` columns.
+  S1  review/statements-REPORT.md passes R1 and has a table with `Centrality` and
+      `Holds` columns.
   S2  analysis/statements/statement-ledger.csv: columns; unique `ST` IDs; enums for
       kind, centrality, holds, status; kernel and evidence filled; not_established
       filled unless holds = holds; at least one primary row.
@@ -81,8 +91,8 @@ MODULES = ("sample-size-diagnostics", "simulation-diagnostics", "estimand-diagno
 
 ENUM = {
     "consistency_status": {"consistent", "differs", "missing-in-product",
-                           "missing-elsewhere", "not-applicable"},
-    "arith_result": {"match", "rounding", "mismatch", "none_found"},
+                           "missing-elsewhere", "unverified-here", "not-applicable"},
+    "arith_result": {"match", "rounding", "within-band", "mismatch", "none_found"},
     "sens_class": {"supported", "qualified", "contradicted", "unresolved", "none_found"},
     "sap_status": {"performed as specified", "performed with deviation", "omitted", "post hoc"},
     "spec_status": {"identical", "differs", "not-implemented", "no-code"},
@@ -100,6 +110,8 @@ ENUM = {
     "where": {"text", "code", "text and code", "unresolved"},
 }
 ARTIFACT_STATES = {"done", "nonreproduced", "proxy"}
+REPORT_SECTIONS = ("Status", "Findings", "Leads for later stages", "Scope assumptions",
+                   "Coverage")
 MODE_RANK = {"none": 0, "synthetic": 1, "shared": 2}
 
 SYNTHESIS_SECTIONS = [
@@ -152,7 +164,7 @@ class Gate:
                 self.fail(code, f"{rel} line {i}: {col} = {r.get(col)!r}; expected one of "
                                 f"{', '.join(sorted(ENUM[key]))}.")
 
-    def report(self, code, rel, sections=("Status", "Findings")):
+    def report(self, code, rel, sections=REPORT_SECTIONS):
         if not self.exists(rel):
             self.fail(code, f"{rel} is missing.")
             return None
@@ -160,7 +172,48 @@ class Gate:
         for s in sections:
             if s.lower() not in titles:
                 self.fail(code, f"{rel} has no `## {s}` section.")
-        return open(self.path(rel), encoding="utf-8").read()
+        text = open(self.path(rel), encoding="utf-8").read()
+        self.finding_fields(code, rel, text)
+        return text
+
+    def finding_fields(self, code, rel, text):
+        """Every `### <ID>. <title>` block under `## Findings` names what it bears on
+        and its evidence; `where:` and `fix:` are expected (WARN)."""
+        m = re.search(r"(?ms)^## Findings\s*$(.*?)(?=^## |\Z)", text)
+        if not m:
+            return
+        for block in re.split(r"(?m)^### ", m.group(1))[1:]:
+            title = block.splitlines()[0].strip()
+            if not re.match(r"[A-Z]{1,5}\d+\.", title):
+                continue
+            low = block.lower()
+            for key in ("bears on:", "evidence:"):
+                if key not in low:
+                    self.fail(code, f"{rel}: finding `{title[:50]}` lacks `{key}`.")
+            for key in ("where:", "fix:"):
+                if key not in low:
+                    self.warn(code, f"{rel}: finding `{title[:50]}` lacks `{key}`.")
+
+
+def check_intake(g, assign):
+    rel = "00_INTAKE.md"
+    if not g.exists(rel):
+        g.fail("I1", "00_INTAKE.md is missing: write the intake records (from "
+                     "assets/INTAKE-template.md) before any stage work.")
+    else:
+        text = open(g.path(rel), encoding="utf-8").read()
+        if not re.search(r"(?im)^\W*Suite version\W*:?\W*\d+\.\d+", text):
+            g.fail("I1", "00_INTAKE.md does not record `Suite version:`.")
+        for key in ("data mode", "depth"):
+            if key not in text.lower():
+                g.fail("I1", f"00_INTAKE.md does not record the {key}.")
+        nq = len((assign or {}).get("questions", []))
+        for q in range(1, nq + 1):
+            if not re.search(rf"\bQ{q}\b", text):
+                g.fail("I1", f"00_INTAKE.md does not number the assignment question Q{q}.")
+    for rel in ("AGENTS.md", "PROGRESS.md"):
+        if not g.exists(rel) or os.path.getsize(g.path(rel)) == 0:
+            g.fail("I1", f"{rel} is missing or empty.")
 
 
 def none_found_rule(g, code, rel, rows, col):
@@ -183,6 +236,10 @@ def check_document(g, assign):
     rows = g.csv("D3", rel, ["id", "location", "printed", "recomputed", "script", "result"])
     if rows:
         g.enum("D3", rel, rows, "result", "arith_result")
+        for i, r in enumerate(rows, 2):
+            if (r.get("result") or "").strip().lower() == "within-band" and \
+                    not (r.get("tolerance") or "").strip():
+                g.fail("D3", f"{rel} line {i}: within-band without the band in `tolerance`.")
         if not none_found_rule(g, "D3", rel, rows, "result"):
             for i, r in enumerate(rows, 2):
                 s = (r.get("script") or "").strip()
@@ -238,6 +295,8 @@ def module_walk(g, depth):
             elif re.search(r"^Status:\s*NOT_APPLICABLE", open(g.path(rep), encoding="utf-8").read(),
                            re.M):
                 g.fail("C6", f"{m} fired but its report is a NOT_APPLICABLE stub.")
+            else:
+                g.report("C1", rep)
         elif state == "not applicable" and not g.exists(rep):
             g.fail("C6", f"{m} is not applicable but has no stub at {rep} "
                          "(`Status: NOT_APPLICABLE — <reason>`).")
@@ -321,7 +380,7 @@ def ledger_rows(g, code="S2"):
 
 
 def check_statements(g, assign):
-    text = g.report("S1", "review/statements-REPORT.md", sections=("Status", "Findings"))
+    text = g.report("S1", "review/statements-REPORT.md")
     if text is not None:
         ok = any(any(h.lower() == "centrality" for h in hdr) and any(h.lower() == "holds"
                  for h in hdr) for hdr, _ in jf.md_tables(text))
@@ -445,6 +504,7 @@ def check_verdict(g, assign):
 
 
 STAGES = {
+    "intake": check_intake,
     "document": check_document,
     "code-and-data": check_code_and_data,
     "statements": check_statements,
@@ -463,7 +523,8 @@ def main(argv=None):
     g = Gate(root)
     if assign is None:
         g.fail("A0", "00_ASSIGNMENT.md is missing.")
-    stages = list(STAGES) if a.stage == "all" else [a.stage]
+    stages = list(STAGES) if a.stage == "all" else \
+        (["intake", a.stage] if a.stage != "intake" else ["intake"])
     for s in stages:
         STAGES[s](g, assign)
     for w in g.warns:

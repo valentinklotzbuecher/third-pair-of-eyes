@@ -6,9 +6,9 @@ rule, this file the shape of breaking it.
 
 ## Print fidelity
 
-- **Planning value from the wrong table.** A review recomputed a sample size with the
-  control rate from the "any grade" column where the product's calculation used the
-  "grade 3 or worse" column; every "discrepancy" it reported was against a value the
+- **Planning value from the wrong column.** A review recomputed a sample size with the
+  event rate from a source's "all events" column where the product's calculation used
+  the "first event" column; every "discrepancy" it reported was against a value the
   product never used.
 - **A stale caption taken as the product's value.** A review built its recomputation on
   a figure caption's planning value; the text and the code used another.
@@ -18,7 +18,7 @@ rule, this file the shape of breaking it.
 - **Right number, wrong analysis set.** A review's report cited a per-protocol estimate
   as the full-analysis-set result; the correct row existed in its results file.
 - **Reduced-replicate number cited as a reproduction.** A simulated power from a
-  1,000-replicate code-path check was compared with a printed 5,000-replicate power and
+  500-replicate code-path check was compared with a printed 2,000-replicate power and
   called "not reproduced"; the difference was within Monte Carlo error.
 
 ## Propagation

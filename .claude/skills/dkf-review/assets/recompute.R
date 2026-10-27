@@ -36,6 +36,9 @@ round_half_up <- function(x, digits = 0) {
 # "match": equal within tolerance; "rounding": equal after rounding the computed
 # value to the printed precision (either rounding rule); "mismatch" otherwise.
 agree <- function(printed, computed, tol = 1e-9) {
+  if (length(printed) != 1L || length(computed) != 1L)
+    stop("agree() compares one printed value with one computed value; got lengths ",
+         length(printed), " and ", length(computed))
   p <- parse_printed(printed)
   if (is.na(p) || is.na(computed)) return(NA_character_)
   if (abs(p - computed) <= tol * max(1, abs(p))) return("match")
@@ -43,6 +46,26 @@ agree <- function(printed, computed, tol = 1e-9) {
   if (isTRUE(all.equal(p, round(computed, d))) ||
       isTRUE(all.equal(p, round_half_up(computed, d)))) return("rounding")
   "mismatch"
+}
+
+# Agreement within a stated band (Monte Carlo error, the precision of a figure read):
+# "match"/"rounding" as agree(), else "within-band" when |printed - computed| <= band,
+# else "mismatch". Record the band in the `tolerance` column.
+agree_band <- function(printed, computed, band) {
+  a <- agree(printed, computed)
+  if (is.na(a) || a != "mismatch") return(a)
+  if (abs(parse_printed(printed) - computed) <= band) "within-band" else "mismatch"
+}
+
+# Is a printed value inside the interval its rounded inputs allow? `lo` and `hi` are the
+# smallest and largest values the quantity can take given the printed precision of its
+# inputs. Returns "within-band" or "mismatch".
+agree_interval <- function(printed, lo, hi) {
+  p <- parse_printed(printed)
+  d <- printed_decimals(printed)
+  half <- 0.5 * 10^(-d)
+  if (is.na(p)) return(NA_character_)
+  if (p + half >= min(lo, hi) - 1e-12 && p - half <= max(lo, hi) + 1e-12) "within-band" else "mismatch"
 }
 
 # ---- Counts, percentages, totals --------------------------------------------------
@@ -202,12 +225,23 @@ mcse_prop <- function(p, R) sqrt(p * (1 - p) / R)
 
 # N at which a fitted power curve crosses `target`. `n` is the grid, `rejections`
 # the number of replicates rejecting at each grid point, `R` replicates per point.
-# Fits a binomial GLM of power on log(n); returns the crossing and, for reference,
-# the first grid point whose simulated power reaches the target.
+# Fits a binomial GLM of power on log(n), optionally only over `window` (a local fit
+# around the crossing is better than a global one when the curve's shape is not
+# logistic in log n). Returns the crossing, the first grid point whose simulated
+# power reaches the target (for comparison), and a goodness-of-fit check: a Pearson
+# chi-square p below 0.01 means the curve does not describe the grid — narrow the
+# window or add replicates before using the crossing.
+#
+# Use the raw simulated power at each grid point. A curve made monotone for display
+# (a running maximum, cummax()) is not the simulated power: fitting it biases the
+# crossing towards smaller N.
 power_curve_crossing <- function(n, rejections, R, target = 0.8,
-                                 link = c("logit", "probit")) {
+                                 link = c("logit", "probit"), window = NULL) {
   link <- match.arg(link)
   R <- rep_len(R, length(n))
+  keep <- if (is.null(window)) rep(TRUE, length(n)) else n >= window[1] & n <= window[2]
+  n <- n[keep]; rejections <- rejections[keep]; R <- R[keep]
+  if (length(n) < 3) stop("power_curve_crossing() needs at least 3 grid points in the window")
   fit <- suppressWarnings(glm(cbind(rejections, R - rejections) ~ log(n),
                               family = binomial(link = link)))
   b <- coef(fit)
@@ -215,6 +249,12 @@ power_curve_crossing <- function(n, rejections, R, target = 0.8,
   crossing <- exp((eta - b[[1]]) / b[[2]])
   simulated <- rejections / R
   first_grid <- if (any(simulated >= target)) min(n[simulated >= target]) else NA_real_
+  x2 <- sum(residuals(fit, type = "pearson")^2)
+  p_fit <- stats::pchisq(x2, df.residual(fit), lower.tail = FALSE)
+  if (is.finite(p_fit) && p_fit < 0.01)
+    warning(sprintf("power curve fits the grid poorly (Pearson chi-square p = %.3g); ",
+                    p_fit), "narrow `window` around the crossing or add replicates")
   list(crossing = crossing, first_grid_reaching_target = first_grid,
-       coef = b, deviance = deviance(fit), df = df.residual(fit))
+       coef = b, deviance = deviance(fit), df = df.residual(fit),
+       pearson_chisq = x2, fit_p = p_fit, window = range(n))
 }

@@ -13,7 +13,13 @@ Read the product as an argument before touching code. Four questions: is it the
 document it says it is, and does it agree with the documents that govern it; do its
 printed numbers agree with each other and with their own arithmetic; does the design
 and analysis answer the question the product says it answers; and what must the code
-stage check? No code runs in this stage except the arithmetic scripts of section 2.
+stage check? No product code runs in this stage; the review's own scripts run for the
+arithmetic checks and for reading figures (section 2).
+
+The stage may read the Quarto source: for the revision line, and to see where a
+printed number comes from. Its findings rest on the print; what the source shows
+(a hidden setting, a replicate count, a code comment) goes to `code-and-data` as a
+lead, or is cited only as corroboration.
 
 ## 1. Documents, versions and consistency
 
@@ -23,12 +29,17 @@ registry identifiers it carries. A product whose title page, footer revision and
 source revision disagree has a version problem; record it.
 
 **Consistency matrix.** `analysis/document/consistency-matrix.csv`
-(template `../assets/consistency-matrix.csv`), one row per design element that appears
-in more than one document: `element | product | protocol | sap | sse | registry |
-other | status | evidence`, each cell the value as printed with its location, and
-`status` one of `consistent`, `differs`, `missing-in-product`, `missing-elsewhere`,
-`not-applicable`. Walk at least these elements, as far as the product type covers
-them (`../references/product-profiles.md`):
+(template `../assets/consistency-matrix.csv`), one row per design element below:
+`element | product | protocol | sap | sse | registry | other | status | evidence`, each
+cell the value as printed with its location (`other` holds the assignment, a second
+statement of the element inside the product, or a document not named in the
+columns), and `status` one of `consistent`, `differs`, `missing-in-product`,
+`missing-elsewhere`, `unverified-here` (the comparison needs a governing document
+that is not in the job; the cell reads `not in job`) or `not-applicable`. When no
+governing document is in the job, the matrix still records each element as the
+product states it (once or several times) and as the assignment states it. Walk at
+least these elements, as far as the product type covers them
+(`../references/product-profiles.md`):
 
 - primary endpoint: definition, measurement, time frame or window, scoring;
 - estimand attributes: population, treatment conditions, variable, intercurrent
@@ -83,8 +94,13 @@ Walk every summary, table, figure, caption and conclusion of the rendered produc
 - **Arithmetic checks.** Recompute every derivable printed number from the printed
   numbers it depends on, and log each in `analysis/document/arithmetic-checks.csv`
   (template `../assets/arithmetic-checks.csv`): `id | location | quantity | printed |
-  inputs (with locations) | recomputed | method | script | result | note`, `result`
-  one of `match`, `rounding` (agrees to the printed precision), `mismatch`. Typical
+  inputs (with locations) | recomputed | method | script | result | tolerance | note`,
+  `result` one of `match`, `rounding` (agrees to the printed precision),
+  `within-band` (agrees within a stated band: Monte Carlo error, the precision of a
+  figure read, an interval implied by rounded inputs; the band goes in `tolerance`)
+  or `mismatch`; `note` says what the check could detect where that is not obvious
+  (rule 8). A mismatch explained by Monte Carlo error or by printed rounding is
+  recorded with its explanation and is not raised as a finding. Typical
   checks, with functions in `../assets/recompute.R`: percentages from counts; sums and
   totals; an inflation for dropout (N / (1 − d) is the usual convention; N × (1 + d)
   under-inflates and is a finding unless stated); rounding up to an even number or a
@@ -92,16 +108,18 @@ Walk every summary, table, figure, caption and conclusion of the rendered produc
   (an interval for a ratio is symmetric on the log scale); a p-value against its
   interval (Altman and Bland's method, `p_from_ci()`); an expected mean score or event
   rate from component values and weights. Every recomputation runs as a script under
-  `work/scripts/` with a log; none is done in prose.
-- **Statements of sensitivity and robustness.** Every sentence of the form "results
-  are robust / similar / not sensitive to X", "the sample size is primarily driven by
-  Y", "power remains above Z% under …" is a testable claim about a printed table or
-  figure. Open the exhibit, check every scenario the sentence covers, and classify it
+  `work/scripts/` with a log; none is done in prose. Values plotted in figures are
+  read with a script (`../SKILL.md`, Running it: figures are print).
+- **Statements of sensitivity, robustness and adequacy.** Every sentence of the form
+  "results are robust / similar / not sensitive to X", "the sample size is primarily
+  driven by Y", "power remains above Z% under …", "a conservative approximation",
+  "consistent with the feasibility estimate", "the most consequential uncertainty" is a
+  testable claim about a printed table, figure or stated fact. Open the exhibit, check every scenario the sentence covers, and classify it
   in `analysis/document/sensitivity-claims.csv` (`claim | location | cited_exhibit |
   scenarios_covered | classification | evidence`) as `SUPPORTED`, `QUALIFIED`,
-  `CONTRADICTED` or `UNRESOLVED`. A scan that finds none writes one row
-  `NONE_FOUND` naming the search terms; a header-only file cannot be told from a
-  skipped scan. A general statement backed by a check on a subset of scenarios is a
+  `CONTRADICTED` or `UNRESOLVED`. The search terms go in the report's Coverage
+  section; a scan that finds none writes one row `NONE_FOUND` naming them (a
+  header-only file cannot be told from a skipped scan). A general statement backed by a check on a subset of scenarios is a
   lead for `code-and-data`.
 - Figures: axis labels, units and captions name the plotted quantity; a reference
   line or annotated value matches the text.

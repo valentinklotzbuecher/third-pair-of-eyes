@@ -1,84 +1,84 @@
 # Worked cases
 
 Stylised composite cases that show the procedures at work. They are not records of any
-real review; verify every new case on its own evidence.
+real review, and their numbers are invented; verify every new case on its own
+evidence, and do not look for these patterns in a product because they appear here.
 
-## A caption that disagrees with the text
+## A footnote that disagrees with the text
 
-*Case: an SSE plots power against N for the planning values "S_ctrl = 0.40,
-S_trt = 0.57". The figure caption gives 0.58 for the treatment arm; the text, the
-summary and the code use 0.57.* The printed-consistency walk records three agreeing
-mentions and one disagreeing caption; the specification map shows the code uses 0.57.
-The planning-value row holds; the caption is a finding on a row that holds, `where:
-text`, fixed by correcting the caption. Had the code used 0.58 while the text said
-0.57, the row would be `not established` until the author said which value is meant,
-and the finding would be `where: unresolved`.
+*Case: a SAP defines the primary endpoint at day 28 with a visit window of ± 3 days in
+the text; the footnote of a mock table says ± 7 days.* The consistency walk records
+both locations; the derivation code delivered with the SAP uses ± 3. The specification
+row holds (text and code agree) and the footnote is a finding on a row that holds,
+`where: text`. Had the code used ± 7 while the text said ± 3, the row would be `not
+established` until the author said which window is meant, and the finding would be
+`where: unresolved`.
 
 ## Units in an event-driven sample size
 
-*Case: the primary endpoint is event-free survival from day 61 to day 365 after a
-procedure, a window of 304 days. Planning values are stated as 12-month event-free
-proportions. A design function is called with the event probabilities at its default
-`eventTime = 12` while accrual and follow-up are entered in days.* The design function
-then reads the probabilities for the 304-day window as probabilities at day 12, and
-the hazards it derives are about 25 times (304 / 12) too large; the event count and N it returns are not
-the trial's. The independent recomputation (exponential hazards from the 304-day
-proportions, Schoenfeld's formula for events, the event probability over the window)
-gives a different N; the difference traces to the units, not to the method. Lesson:
-time units are inputs of the recomputation, written into the design question, not a
-detail to check afterwards.
+*Case: time to first exacerbation over 48 weeks. The cited trial reports event-free
+proportions at 48 weeks; the design function is called with those proportions while
+its event time is left at the default of 12 and accrual and follow-up are entered in
+weeks.* The function reads the 48-week proportions as proportions at week 12, so the
+hazards it derives are four times too large and the event count and N it returns
+belong to a different trial. The independent recomputation (exponential hazards from
+the 48-week proportions, Schoenfeld's formula for events, the event probability over
+the accrual and follow-up pattern) gives another N; the difference traces to the
+time unit, not to the method. Lesson: time units and horizons are inputs of the
+recomputation, written into the design question, not details checked afterwards.
 
 ## Inflating for dropout
 
-*Case: 84 evaluable participants, 10% expected without an evaluable endpoint, target
-"84 × 1.10 = 93, rounded to 100".* 84 / 0.90 = 93.3, so 94 is the minimum; rounding to
-100 covers both, and the printed target holds. The text's formula is still wrong and is
-a finding on a row that holds (`where: text`). Had the target been 93, the randomised N
-would have been `not established` at the stated dropout rate.
+*Case: 128 evaluable participants, 15% expected dropout, target "128 × 1.15 = 148".*
+128 / 0.85 = 150.6, so 151 is the minimum at the stated dropout rate; 148 randomised
+yields about 126 evaluable. The randomised-N statement is `narrower` (it holds for a
+dropout rate up to about 13.5%), and the finding is `where: text and code` when the
+code multiplies too.
 
 ## A calculation for one test, an analysis with another
 
-*Case: the sample size simulates an unadjusted Welch interval for a mean score; the SAP
-plans a linear model adjusted for the stratification factors with a robust interval.*
-The product says the unadjusted interval is a conservative approximation. Covariate
-adjustment for prognostic stratification factors does not reduce power in expectation,
-so the direction is right and the statement holds as a planning approximation; the
-review records it, and adds a finding only if the robust variance estimator the SAP
-names is known to be anti-conservative at the planned N, quantified.
+*Case A: the sample size is for a two-sample t-test on the 6-month value; the SAP plans
+an ANCOVA adjusting for the baseline value.* With a positive correlation between
+baseline and follow-up, the ANCOVA needs fewer participants, so the calculation is
+conservative; the statement holds when the product says so, and a missing sentence is
+a text finding at most. *Case B: the calculation assumes the ANCOVA gain (correlation
+0.6), but the SAP's primary analysis is a rank test on change scores.* The power the
+calculation promises is not delivered by the planned analysis: a finding against the
+sample-size statement, quantified by simulating the planned analysis.
 
 ## A filter that drops missing values
 
 *Case: a report's analysis set is "all randomised participants with a baseline
-measurement". The code filters `baseline > 0`.* On the synthetic `edge` dataset, two
-participants with a missing baseline and one with a baseline of exactly 0 are planted;
-the expected analysis set excludes the two missing ones only. The code excludes all
-three (`filter()` drops the `NA` rows and the zero). The printed N cannot be checked
-without data, but the code does not implement the printed definition: a finding,
-`where: code`, established without patient data.
+measurement". The code filters `baseline_value > 0`.* On the synthetic `edge` dataset,
+two participants with a missing baseline and one with a baseline of exactly 0 are
+planted; the expected analysis set excludes the two missing ones only. The code
+excludes all three (`filter()` drops the `NA` rows and the zero). The printed N cannot
+be checked without data, but the code does not implement the printed definition: a
+finding, `where: code`, established without patient data.
 
 ## A recomputation that agrees for the wrong reason
 
 *Case: the review recomputes an SSE's N with a closed form and gets the printed N to
-the participant, taking the control-group rate from the product's code.* The cited
-source reports a rate of 0.35 for a comparable population, not the 0.40 in the code.
-The challenge stage rules the agreement a check of arithmetic only: the planning value
-is `TRANSPORTED` or `UNANCHORED` depending on what the source contains, and the
+the participant, taking the standard deviation from the product's code (12 mmHg).*
+The cited trial reports 15 mmHg for the same outcome in a comparable population. The
+challenge stage rules the agreement a check of arithmetic only: the planning value is
+`TRANSPORTED` or `UNANCHORED` depending on what the source contains, and the
 recomputation with the source's value is the one that bears on the statement.
 
-## A noisy grid
+## A noisy grid and a smoothed curve
 
-*Case: a simulated sample size picks the first grid point whose simulated power
-reaches 80% at 5,000 replicates per point, and the text calls the N "approximate".* A
-fitted power curve over the grid puts the crossing one grid step later. The product
-already says the N is approximate; the review engages that statement on its terms: the
-finding is that the approximation runs in the unfavourable direction by one grid step,
-with the fitted crossing and its Monte Carlo interval, not that the N is wrong.
+*Case: a cluster-randomised trial's number of clusters is chosen as the first grid
+point whose simulated power reaches 90%, at 1,000 replicates per point, and the power
+figure is drawn with `cummax()` so that it never decreases.* A power curve fitted to
+the raw grid output crosses 90% one cluster per arm later than the product's choice,
+with a Monte Carlo interval that excludes the chosen number. The finding is that the
+chosen number is optimistic by about one cluster per arm; the smoothed figure is a
+second finding where the text reads values off it.
 
 ## A planning value from another population
 
-*Case: a control-group toxicity rate is taken from trials in metastatic disease and
-applied to an adjuvant population with shorter, less intensive treatment.* The value is
-`TRANSPORTED`. The sensitivity of N to it decides what it costs: if a plausible
-adjuvant rate moves N by a few participants, the row holds with a note; if it moves N
-beyond recruitment, the sample-size statement is `narrower` (it holds for the cited
-population's rate only).
+*Case: a 30-day readmission rate taken from a national registry is applied to a single
+tertiary centre whose case mix differs.* The value is `TRANSPORTED`. The sensitivity of
+N to it decides what it costs: if a plausible local rate moves N by a few
+participants, the row holds with a note; if it moves N beyond recruitment, the
+sample-size statement is `narrower` (it holds for the registry's rate only).

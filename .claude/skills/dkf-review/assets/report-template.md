@@ -29,8 +29,9 @@ evidence: [paths to script and log, ledger row, or printed location / file:line]
 What is wrong, the printed value against what was found, and its effect: the primary
 quantity before and after (an N, a power, an estimate), in its own units. State the
 direction: a defect that makes the product conservative is written as conservative.
-Say so plainly when a correction leaves the result unchanged. End with what would fix
-it.
+Say so plainly when a correction leaves the result unchanged.
+
+fix: [what would resolve it, concretely]
 
 A blocked check (exact file, command, error), a check limited by the data mode, and a
 justified `NOT_APPLICABLE` are recorded here too, so the gap is visible.

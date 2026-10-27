@@ -12,7 +12,9 @@ API prototype is in `archive/` and is not maintained.
 - **Before starting a review of a real product, confirm with the user**: a
   standard-depth review runs many agent turns for tens of minutes or longer and costs
   far more than a single model call. Say which depth and data mode the assignment
-  sets.
+  sets. This is the coordinating session's job, done once before any stage agent is
+  dispatched; stage agents do not ask, and write anything they need from the user
+  under "Requests for the operator" in the job's `00_INTAKE.md`.
 - **Clearance first, every time.** Run
   `python3 .claude/skills/dkf-review/scripts/scan_job.py --root jobs/<job>` before
   opening any file in a job. On a non-zero exit, stop and tell the user what the scan

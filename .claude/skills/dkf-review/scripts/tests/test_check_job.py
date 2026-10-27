@@ -181,3 +181,50 @@ def test_synthesis_must_carry_every_ledger_row(job, capsys):
     write(p, re.sub(r"(?m)^\| \"control rate.*\n", "", text))
     code, out = gate(job, "verdict", capsys)
     assert code == 1 and "lacks rows: ST02" in out
+
+
+def test_intake_records_required(job, capsys):
+    os.remove(os.path.join(job, "00_INTAKE.md"))
+    os.remove(os.path.join(job, "PROGRESS.md"))
+    code, out = gate(job, "document", capsys)
+    assert code == 1
+    assert "00_INTAKE.md is missing" in out and "PROGRESS.md is missing" in out
+
+
+def test_intake_numbers_questions(job, capsys):
+    edit(os.path.join(job, "00_INTAKE.md"), "Q2. Should", "2. Should")
+    code, out = gate(job, "intake", capsys)
+    assert code == 1 and "question Q2" in out
+
+
+def test_report_sections_and_finding_fields(job, capsys):
+    p = os.path.join(job, "review/document-REPORT.md")
+    edit(p, "## Scope assumptions\n\nNone.\n\n", "")
+    edit(p, "bears on: the control rate (ST02)\n", "")
+    edit(p, "fix: cite it.\n", "")
+    code, out = gate(job, "document", capsys)
+    assert code == 1
+    assert "no `## Scope assumptions` section" in out
+    assert "lacks `bears on:`" in out
+    assert "WARN" in out and "lacks `fix:`" in out
+
+
+def test_within_band_needs_tolerance(job, capsys):
+    p = os.path.join(job, "analysis/document/arithmetic-checks.csv")
+    with open(p, "a", encoding="utf-8") as fh:
+        fh.write("A2,Table 5,power,81%,MC,80.6%,simulation,work/scripts/arith.R,within-band,\n")
+    code, out = gate(job, "document", capsys)
+    assert code == 1 and "within-band without the band" in out
+
+
+def test_consistency_unverified_here_accepted(job, capsys):
+    edit(os.path.join(job, "analysis/document/consistency-matrix.csv"), ",consistent,", ",unverified-here,")
+    code, out = gate(job, "document", capsys)
+    assert code == 0, out
+
+
+def test_fired_module_report_needs_sections(job, capsys):
+    write(os.path.join(job, "analysis/code-and-data/simulation-diagnostics-REPORT.md"),
+          "# Simulation\n\n## Status\n\nCOMPLETE\n\n## Findings\n\nNone.\n")
+    code, out = gate(job, "code-and-data", capsys)
+    assert code == 1 and "simulation-diagnostics-REPORT.md has no `## Coverage`" in out

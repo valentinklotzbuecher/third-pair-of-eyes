@@ -267,7 +267,29 @@ def scan_qmd(path, root):
     rec["packages"] = packages
     rec["files_read"] = reads
     rec["inline_r"] = len(re.findall(r"`r\s+[^`]+`", text))
+    rec["unfilled_params"] = unfilled_params(rec["params"])
+    fname = rec["params"].get("file-name") if isinstance(rec["params"], dict) else None
+    stem = os.path.splitext(os.path.basename(path))[0]
+    rec["file_name_param_mismatch"] = bool(fname) and isinstance(fname, str) and fname != stem
     return rec
+
+
+def _norm(s):
+    return re.sub(r"[^a-z0-9]", "", str(s).lower())
+
+
+def unfilled_params(params):
+    """Template parameters that look unfilled: a value that repeats its own key
+    (`study-hra-category: 'HRA Category'`), a `<…>` placeholder, or TBD/XXX."""
+    out = []
+    for k, v in (params or {}).items():
+        if not isinstance(v, str) or not v.strip():
+            continue
+        nv, nk = _norm(v), _norm(k)
+        if re.fullmatch(r"\s*<[^>]*>\s*", v) or nv in ("tbd", "xxx", "todo", "tba") or \
+                (len(nv) >= 6 and nk.endswith(nv)):
+            out.append(k)
+    return out
 
 
 def run(cmd):
@@ -348,6 +370,15 @@ def main(argv=None):
 
     checks = {}
     prod_pdfs = [p for p in pdfs if p["path"].startswith("01_product")]
+    for q in qmds:
+        if q.get("file_name_param_mismatch"):
+            warnings.append(f"{q['path']}: the `file-name` parameter "
+                            f"({q['params'].get('file-name')!r}) differs from the file's name; "
+                            "the product was renamed after it was rendered (the working copy may "
+                            "need the original name, logged as a repair).")
+        if q.get("unfilled_params"):
+            warnings.append(f"{q['path']}: template parameters that look unfilled: "
+                            + ", ".join(q["unfilled_params"]))
     svn = [q["svn_id"] for q in qmds if q.get("svn_id")]
     if svn and prod_pdfs:
         revs = {p.get("footer_revision") for p in prod_pdfs if p.get("footer_revision")}

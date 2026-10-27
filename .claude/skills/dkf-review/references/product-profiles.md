@@ -42,8 +42,8 @@ Fields left empty in the template are recorded as empty, not guessed.
 - **Core modules**: `sample-size-diagnostics`; `simulation-diagnostics` when the
   calculation simulates; `estimand-diagnostics` (light pass: the estimand the effect
   refers to and the intercurrent events the calculation ignores);
-  `time-to-event-diagnostics` for event-driven designs; `small-n-diagnostics` when N is
-  small.
+  `time-to-event-diagnostics` for event-driven designs; `small-n-diagnostics` when the
+  target is below about 50 evaluable participants per arm or 40 clusters.
 - **Out of scope**: the full analysis plan; the completeness of the protocol.
 
 ## `protocol`: statistics sections of a protocol

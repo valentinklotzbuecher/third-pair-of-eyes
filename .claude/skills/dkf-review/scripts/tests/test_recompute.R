@@ -99,5 +99,23 @@ truth <- exp((qlogis(0.8) + 9) / 2.4)
 check("power_curve_crossing within 2% of truth", abs(pc$crossing / truth - 1) < 0.02)
 check("power_curve_crossing reports first grid point", !is.na(pc$first_grid_reaching_target))
 
+# band and interval agreement
+check("agree_band within Monte Carlo band", agree_band("81%", 80.4, band = 1.2) == "within-band")
+check("agree_band outside band", agree_band("81%", 78.0, band = 1.2) == "mismatch")
+check("agree_band keeps rounding", agree_band("80.4", 80.42, band = 1) == "rounding")
+check("agree_interval inside rounded bounds", agree_interval("0.20", 0.196, 0.204) == "within-band")
+check("agree_interval outside", agree_interval("0.25", 0.196, 0.204) == "mismatch")
+check("agree rejects vectors", inherits(try(agree(c("1", "2"), 1), silent = TRUE), "try-error"))
+
+# power curve: misfit warning and window
+set.seed(2)
+n2 <- seq(40, 300, by = 10)
+p2 <- ifelse(n2 < 150, plogis(-6 + 1.6 * log(n2)), 0.75)   # plateau: not logistic in log n
+rej2 <- rbinom(length(n2), 5000, p2)
+w <- tryCatch(power_curve_crossing(n2, rej2, 5000), warning = function(w) w)
+check("power_curve_crossing warns on misfit", inherits(w, "warning"))
+loc <- power_curve_crossing(n, rej, R, target = 0.8, window = c(70, 110))
+check("power_curve_crossing local window", abs(loc$crossing / truth - 1) < 0.03 && loc$window[1] >= 70)
+
 cat(if (failures == 0L) "PASS\n" else sprintf("%d FAILED\n", failures))
 quit(status = if (failures == 0L) 0L else 1L)

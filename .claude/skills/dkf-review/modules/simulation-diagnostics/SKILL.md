@@ -43,16 +43,21 @@ load-bearing number has a closed form; name them.
   not be). The decision rule matches the text (two-sided interval excludes zero;
   one-sided in the favourable direction; both).
 - **Monte Carlo error.** For a simulated power p from R replicates, MCSE = √(p(1 − p)/R)
-  (0.8 at R = 5,000: 0.57 percentage points). Report it beside every simulated number
+  (0.8 at R = 2,000: 0.89 percentage points). Report it beside every simulated number
   the product prints, and check any MCSE the product states. A difference between two
   simulated numbers smaller than about 2·√2·MCSE is not a difference.
 - **Grid search.** "The smallest grid value reaching 80% power" selects on noise: with
-  5,000 replicates, a grid point whose true power is 79.0% passes 80% with probability
-  about 4%, and among several grid points just below the target the chance that one of
-  them passes is correspondingly larger. Fit a smooth power curve over the grid (a logistic or probit
-  regression of the replicate-level rejections on N, or on log N), read the N at which
-  the fitted power crosses the target, and compare with the product's N; run more
-  replicates near the crossing where the two differ by more than the grid step.
+  2,000 replicates, a grid point whose true power is 79.0% passes 80% with probability
+  about 14%, and among several grid points just below the target the chance that one
+  of them passes is correspondingly larger. Fit a smooth power curve over the grid
+  (`power_curve_crossing()` in `../../assets/recompute.R`: a logistic or probit
+  regression of the rejections on log N, over a window around the crossing when the
+  curve is not logistic over the whole grid), read the N at which the fitted power
+  crosses the target, and compare with the product's N; run more replicates near the
+  crossing where the two differ by more than the grid step. Fit the raw simulated
+  power at each grid point: a curve the product made monotone for display (a running
+  maximum, `cummax()`) is not the simulated power, biases a fit towards smaller N, and
+  is itself a finding where the text or a table reads values off it.
 - **Type I error and sanity under the null.** Where the product reports a simulated
   null, check it was run with the same generator and analysis at a relevant N; where it
   does not, run one: a test whose simulated size is materially above alpha makes every

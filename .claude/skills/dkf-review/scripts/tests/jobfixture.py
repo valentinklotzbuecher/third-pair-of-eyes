@@ -176,7 +176,16 @@ def make_job(root, ptype="sse", mode="none", npf="dat/calc.rds (saved simulation
     write(f"{j}/01_product/example_SSE001.qmd", QMD)
     write(f"{j}/01_product/dat/calc.rds", "not really rds")
     write(f"{j}/02_governing/protocol_v1_2026-01-01.txt", "protocol text")
-    rep = "# Report\n\n## Status\n\nCOMPLETE\n\n## Findings\n\nNone.\n"
+    rep = ("# Report\n\n## Status\n\nCOMPLETE\n\n## Findings\n\n"
+           "### D1. The control rate has no source\nbears on: the control rate (ST02)\n"
+           "where: text\nevidence: work/logs/ss.log\n\nBody.\n\nfix: cite it.\n\n"
+           "## Leads for later stages\n\nNone.\n\n## Scope assumptions\n\nNone.\n\n"
+           "## Coverage\n\nAll.\n")
+    write(f"{j}/00_INTAKE.md", "# Intake\n\nSuite version: 0.1.0\nData mode: none\nDepth: standard\n\n"
+          "Q1. Is the sample size driven mainly by the treatment effect?\n"
+          "Q2. Should non-proportional hazards be discussed?\n")
+    write(f"{j}/AGENTS.md", "# Review job\n")
+    write(f"{j}/PROGRESS.md", "# Progress\n\n## Done\n")
     for s in ("document", "code-and-data"):
         write(f"{j}/review/{s}-REPORT.md", rep)
     write(f"{j}/review/statements-REPORT.md", rep + textwrap.dedent("""

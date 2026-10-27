@@ -117,3 +117,19 @@ def test_front_matter_parser_handles_lists_and_blocks():
     assert fm["author"] == ["name: X", "Y"]
     assert fm["abstract"] == "line one: with colon line two"
     assert fm["params"] == {"a": "1", "b": {}}
+
+
+def test_renamed_product_and_unfilled_params(tmp_path, capsys):
+    j = make_job(tmp_path / "job")
+    p = os.path.join(j, "01_product", "example_SSE001.qmd")
+    text = open(p, encoding="utf-8").read().replace(
+        "  final-product-risk:\n",
+        "  final-product-risk:\n  file-name: 'ex26Test1SSE001'\n  study-hra-category: 'HRA Category'\n")
+    write(p, text)
+    code, rep = scan(j)
+    assert code == 0
+    q = rep["quarto_sources"][0]
+    assert q["file_name_param_mismatch"] is True
+    assert q["unfilled_params"] == ["study-hra-category"]
+    w = " ".join(rep["clearance"]["warnings"])
+    assert "`file-name` parameter" in w and "look unfilled: study-hra-category" in w

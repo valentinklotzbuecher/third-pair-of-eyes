@@ -88,9 +88,9 @@ core modules and what is out of scope.
    unfinished (name it), including a stage the harness cannot start in a fresh context
    and a question waiting on the operator. `BLOCKED` = nothing can be anchored (give
    the exact evidence). A check that the product's own materials make impossible (a
-   planning value with no source, a saved result with no code that made it, an
-   analysis the text names but never specifies) is *unverifiable as delivered*: a
-   finding. A check the review could not run because of its own limits (patient data
+   planning value with no source, a source named only in a code comment or in a file
+   that was not delivered, a saved result with no code that made it, an analysis the
+   text names but never specifies) is *unverifiable as delivered*: a finding. A check the review could not run because of its own limits (patient data
    not shared under the job's data mode, a cited source it could not obtain) is
    `unverified-here`: a limit on the review, never a finding against the product.
    Status rolls up: one `INTERIM` check makes its stage `INTERIM`, and one `INTERIM`
@@ -127,7 +127,9 @@ core modules and what is out of scope.
     Name what is meant in words ("the dropout allowance (Statistical comparison
     framework, p. 3)"), never a bare section number, a review-internal section, or a
     bare row or finding ID ("ST04", "C2") as a noun. A locator or ID may follow in
-    parentheses once the thing has been named.
+    parentheses once the thing has been named. The rule binds prose (reports, the
+    synthesis, messages); IDs in ledger cells, `bears on:` lines and `sources:` fields
+    are fine.
 11. **Data protection comes first.** Open only what `00_ASSIGNMENT.md` clears.
     Patient-level data is never opened, printed, copied or quoted unless the data mode
     is `shared`; even then, review artifacts carry aggregates only: no row-level
@@ -176,20 +178,30 @@ depth.
 
    Move files the operator dropped at the root into this layout; never rename files
    inside `01_product/` (the source refers to them by path).
-3. **Required.** The rendered product, or its source where no render exists. Missing
-   both stops the run. A governing document the product relies on ("as specified in
-   the protocol") and that is not in the job is asked for once; unattended, it is
-   recorded, and every check resting on it is `unverified-here`.
-4. **Records.** Write `AGENTS.md` (heading, objective, packet list), `PROGRESS.md`,
-   and `00_INTAKE.md`: the inventory; each document's identity (title, version or
-   revision, date); the product type and its profile; the data mode and what it
-   permits; the depth; the DKF product fields from the scan (internal ID, level of
-   assumptions, influence on protocol, risk) where present; the questions from the
-   assignment verbatim, numbered `Q1, Q2, …`; and `Suite version: <x>` copied from
-   this skill's `metadata.version`, so a later audit knows what the run was asked to
-   do. `review/extracts/` holds `pdftotext -layout` dumps of the product, the
-   governing documents and every `lit/` work the review quotes; later quote checks
+3. **Records, before any stage work.** Write `PROGRESS.md`, `AGENTS.md` and
+   `00_INTAKE.md` from `assets/PROGRESS-template.md`, `assets/AGENTS-template.md` and
+   `assets/INTAKE-template.md` now, from the assignment and the scan: settings, the
+   questions verbatim numbered `Q1, Q2, …`, the inventory, the DKF product fields and
+   the render environment where the scan found them, and `Suite version: <x>` copied
+   from this skill's `metadata.version` (so a later audit knows what the run was asked
+   to do). Document identities (title, version, date) are filled in as the documents
+   are read; a field not yet known says so. `check_job.py --stage intake` must pass
+   before the document stage starts; every later gate re-checks it.
+4. **Extracts.** Dump the product, the governing documents and every `lit/` work the
+   review quotes with `pdftotext -layout` into `review/extracts/`; later quote checks
    read only these.
+5. **Required.** The rendered product, or its source where no render exists. Missing
+   both stops the run. A governing document the product relies on ("as specified in
+   the protocol") and that is not in the job is requested once under "Requests for
+   the operator" in `00_INTAKE.md`; unattended, or when the assignment says it is not
+   provided, every check resting on it is `unverified-here` and the stage can still
+   be `COMPLETE`.
+
+**The operator and stage agents.** Only the coordinating session talks to the
+operator, and it confirms the run (depth, data mode, expected cost) before dispatching
+any stage. A stage agent that needs something from the operator writes the request
+under "Requests for the operator" in `00_INTAKE.md`, continues by rule, and names the
+request in its report; the coordinator relays it.
 
 ## Job tree
 
@@ -201,7 +213,8 @@ depth.
 │   └── extracts/  pdftotext dumps of the packet and of every quoted source
 ├── analysis/
 │   ├── document/       consistency-matrix.csv · arithmetic-checks.csv ·
-│   │                   sensitivity-claims.csv · sap-adherence.csv (reports) · drift-table.md
+│   │                   sensitivity-claims.csv · sap-adherence.csv (reports and manuscripts) ·
+│   │                   drift-table.md (when earlier versions exist)
 │   ├── code-and-data/  spec-map.csv · feasibility-matrix.csv · construction-ledger.md ·
 │   │                   battery-manifest.csv · results.csv · data-findings.csv ·
 │   │                   assumption-ledger.csv (SSE) · module-walk.md · <module>-REPORT.md
@@ -278,7 +291,7 @@ consistency review in the DKF form.
 Each stage writes `review/<stage>-REPORT.md` from `assets/report-template.md` (the
 challenge stage uses its own format). The report is the handoff to later stages:
 findings, leads, and **scope assumptions**, the limits a stage relied on ("the
-simulation was re-run at 1,000 instead of 5,000 replicates", "all data are
+simulation was re-run at 500 instead of 2,000 replicates", "all data are
 synthetic"). A later stage that overturns a scope assumption re-checks, or flags, every
 conclusion that rested on it.
 
@@ -305,13 +318,15 @@ from it goes into `SYNTHESIS.md`.
 
 ## Running it
 
-- Commands run from the job root; `<dkf-review skill>` is this skill's directory.
-  `python3` means a Python 3.10+ interpreter with the packages the repository README
-  lists; `Rscript` means the R installation the product was written for, or the
-  closest available, with the difference recorded.
-- R code runs from `work/pkg/`. Use `quarto render` where Quarto is installed;
-  otherwise extract the code with `knitr::purl()` and run it with `Rscript`, recording
-  which. A product that pins packages with `groundhog` or `renv` is first run as
+- Commands and the review's own scripts run from the job root; `<dkf-review skill>` is
+  this skill's directory. `python3` means a Python 3.10+ interpreter with the packages
+  the repository README lists; `Rscript` means the R installation the product was
+  written for, or the closest available, with the difference recorded.
+- The product's own code runs from its working copy `work/pkg/`. Use `quarto render`
+  where Quarto is installed; otherwise extract the code with `knitr::purl()` and run it
+  with `Rscript`, recording which. Where the operator renamed the product file and the
+  source refers to its own file name (a `file-name` parameter, a render helper), the
+  working copy may restore the original name; log it as a repair. A product that pins packages with `groundhog` or `renv` is first run as
   delivered; where the pinned versions cannot be installed (no network, no CRAN
   access), shim the loader to the installed versions, log the shim and the version
   differences against the render environment read at intake, and record it as a scope
@@ -364,3 +379,8 @@ handles which kind of task; where nothing is set, every agent uses the session's
 - **Text first, then the page.** Locate quotes and numbers in `review/extracts/`
   first; where a rule requires the page, render only that page
   (`pdftoppm -f N -l N -r 150`), cropped to the table or paragraph.
+- **Figures are print.** A value read off a figure (a curve's crossing, an annotated
+  point, an axis) is read from the PDF's vector graphics where possible
+  (`pdftocairo -svg -f N -l N`, parsed by a script that maps path coordinates to the
+  axes) and otherwise from the rendered page; either way the script and log are saved,
+  and the read is recorded as approximate with its precision.
