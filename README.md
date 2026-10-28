@@ -18,6 +18,14 @@ for what was kept, adapted and replaced. The earlier single-call API prototype i
 The review is an aid to the human consistency review, not a replacement. It says what
 it checked, on what evidence, and what it could not check.
 
+**Status: version 0.1.0, no complete review yet.** A trial on one real SSE (7 pages,
+data mode `none`) ran the document stage and the code-and-data stage up to the
+clinical modules, and the problems it showed were fixed in the skills. The clinical
+modules, the statements, challenge, verdict and audit stages, the consistency-review
+form and the data modes `synthetic` and `shared` have not yet run to completion on a
+real product; their scripts are tested on fixtures only. Read the first reviews
+closely.
+
 ## The skills
 
 | Skill | What it does |
@@ -67,7 +75,9 @@ the current DKF rules before clearing anything beyond the default. Details:
    reviewer, the documents it depends on, what is cleared, the data mode, the depth.
 4. Ask the agent: *"Review the product in jobs/2026-10_SSE001_NIR with dkf-review, then
    write the consistency review."* It runs the clearance scan first and stops on any
-   problem.
+   problem, then states the depth and data mode the assignment sets and waits for your
+   go-ahead. A run that stops part-way (a usage limit, a closed session) continues
+   when you ask the agent to resume the job; it reads `jobs/<job>/PROGRESS.md` first.
 5. Read `jobs/<job>/CONSISTENCY_REVIEW.html` (and `work/annotated/*.REVIEW.qmd`), then
    edit the form as the human reviewer.
 
@@ -88,8 +98,9 @@ Claude Code is logged in with the subscription:
   `/status` before a run.
 - Usage limits are per session window and per week. In the trial on a 7-page SSE,
   each stage used about 0.5M tokens, and four module agents running in parallel used
-  up a session's allowance. Use depth `quick` for routine SSEs. A run stopped by the
-  limit resumes from the job's `PROGRESS.md` once the limit resets.
+  up a session's allowance, so module agents now run one at a time unless you ask
+  otherwise. Use depth `quick` for routine SSEs, and resume a run stopped by the limit
+  once it resets (step 4).
 - Data terms depend on the plan. On personal plans (Pro, Max), whether chats and
   coding sessions may be used for model training is a privacy setting
   ([Anthropic's consumer terms](https://www.anthropic.com/news/updates-to-our-consumer-terms));
@@ -117,6 +128,7 @@ jobs/                  review jobs (git-ignored; one folder per product review)
 tools/upstream_diff.sh what changed upstream since the fork
 archive/               the earlier API prototype
 CLAUDE.md              instructions for Claude Code in this repository
+AGENTS.md              pointer to CLAUDE.md for other coding agents
 ```
 
 ## Tests

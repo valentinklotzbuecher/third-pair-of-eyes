@@ -1,8 +1,8 @@
 # stats_review: project notes
 
 This repository holds agent skills for AI-assisted consistency review of DKF
-statistical products (`.claude/skills/`), adapted from research_skills. The earlier
-API prototype is in `archive/` and is not maintained.
+statistical products (`.claude/skills/`), adapted from research_skills. `README.md` is
+the user guide. The earlier API prototype is in `archive/` and is not maintained.
 
 ## Running a review
 
@@ -15,6 +15,10 @@ API prototype is in `archive/` and is not maintained.
   sets. This is the coordinating session's job, done once before any stage agent is
   dispatched; stage agents do not ask, and write anything they need from the user
   under "Requests for the operator" in the job's `00_INTAKE.md`.
+- **Billing.** Reviews are meant to run on the Claude subscription Claude Code is
+  logged in with. When confirming, check whether `ANTHROPIC_API_KEY` is set without
+  printing it (`[ -n "${ANTHROPIC_API_KEY:-}" ] && echo set`); if it is, tell the user
+  the run may be billed to that key instead, and that `/status` shows which.
 - **Clearance first, every time.** Run
   `python3 .claude/skills/dkf-review/scripts/scan_job.py --root jobs/<job>` before
   opening any file in a job. On a non-zero exit, stop and tell the user what the scan
@@ -25,6 +29,12 @@ API prototype is in `archive/` and is not maintained.
   internal IDs, unpublished results or data.
 - Long computations (simulations) run in the background with start and end markers
   in their logs; record them in the job's `PROGRESS.md`.
+- Dispatch fired module agents one at a time, each finishing its report before the
+  next starts, unless the user asks for parallel runs: in the trial, four parallel
+  module agents used up a subscription session's allowance, and one at a time a usage
+  limit stops at most one part-way.
+- When the user asks to continue a job, resume from its `PROGRESS.md` under the
+  `dkf-review` progress-file rules.
 
 ## Developing the skills
 
@@ -45,3 +55,6 @@ API prototype is in `archive/` and is not maintained.
 - Skill text follows the upstream register: terse, rule-first, every requirement
   checkable, no narrative of the procedure. Name the substance, never a bare section
   number or ID.
+- Fold what a real run gets wrong into the skills in general terms. Examples and
+  worked cases use invented numbers that mirror no reviewed product: a product's own
+  numbers prime the next review of it, and job contents never leave the job.

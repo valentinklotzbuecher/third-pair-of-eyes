@@ -266,11 +266,12 @@ otherwise only as far as reconciling the run with the print needs.
    | Difference-in-differences, regression discontinuity, instrumental variables, interrupted time series, synthetic control | the upstream `research_skills` module for the design if installed beside this suite; otherwise `NOT_RUN` with that reason |
 
    **Fired modules as separate agents.** The stage agent does A–D and the walk; the
-   fired modules then run in parallel; the stage agent resumes to fold them in, finish
-   its report and run the gate. Each module agent writes its own report, puts its leads
-   under that report's `## Leads for later stages`, keeps scripts and logs in
-   `work/scripts/` and `work/logs/` with names prefixed by the module, and appends its
-   rows to `results.csv` and `battery-manifest.csv` under a file lock
+   fired modules then run, in parallel or one at a time as the operator sets; the stage
+   agent resumes to fold them in, finish its report and run the gate. Each module agent
+   writes its own report, puts its leads under that report's
+   `## Leads for later stages`, keeps scripts and logs in `work/scripts/` and
+   `work/logs/` with names prefixed by the module, and appends its rows to
+   `results.csv` and `battery-manifest.csv` under a file lock
    (`flock analysis/code-and-data/.ledger.lock -c '<append command>'`), in the stage's
    column order, with IDs prefixed by the module's report prefix. The shared ledgers
    are `results.csv`, `battery-manifest.csv`, `spec-map.csv`, `assumption-ledger.csv`
