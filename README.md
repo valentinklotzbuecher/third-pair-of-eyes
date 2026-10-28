@@ -77,6 +77,25 @@ high-risk products. A full multi-agent review runs many agent turns and costs on
 two orders of magnitude more than the single-call prototype did; measure on your own
 products before routine use.
 
+**Running on a Claude subscription.** The skills run inside Claude Code, so a review
+counts against your subscription's usage limits instead of API credits, as long as
+Claude Code is logged in with the subscription:
+
+- Claude Code uses `ANTHROPIC_API_KEY` instead of the subscription whenever that
+  variable is set ([help article](https://support.claude.com/en/articles/11145838-using-claude-code-with-your-max-plan)).
+  The old prototype put the key in `~/.Renviron`, and a terminal opened from RStudio
+  can inherit it. Remove it from the environment Claude Code starts in, and check
+  `/status` before a run.
+- Usage limits are per session window and per week. In the trial on a 7-page SSE,
+  each stage used about 0.5M tokens, and four module agents running in parallel used
+  up a session's allowance. Use depth `quick` for routine SSEs. A run stopped by the
+  limit resumes from the job's `PROGRESS.md` once the limit resets.
+- Data terms depend on the plan. On personal plans (Pro, Max), whether chats and
+  coding sessions may be used for model training is a privacy setting
+  ([Anthropic's consumer terms](https://www.anthropic.com/news/updates-to-our-consumer-terms));
+  commercial plans (Team, Enterprise, Education) and the API are not covered by it.
+  Check the setting and the DKF rules before clearing any document.
+
 ## Requirements
 
 - Claude Code, or another agent harness that can start fresh subagents (the challenge
