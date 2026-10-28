@@ -8,7 +8,9 @@ the user guide. The earlier API prototype is in `archive/` and is not maintained
 
 - Use the `dkf-review` skill, then `dkf-consistency-review` (and `dkf-review-audit`
   first at depth `full`). Jobs live in `jobs/<job>/`, which git ignores: never commit
-  or copy job contents elsewhere.
+  or copy job contents elsewhere. The one exception is a synthetic demonstration
+  product the user names (such as DEMO-TKA from `scto-ai-review`): its review outputs
+  may be copied where the user asks.
 - **Before starting a review of a real product, confirm with the user**: a
   standard-depth review runs many agent turns for tens of minutes or longer and costs
   far more than a single model call. Say which depth and data mode the assignment
