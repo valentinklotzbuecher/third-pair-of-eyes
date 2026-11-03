@@ -8,8 +8,11 @@ For every issue with an `anchor:` field (one or more `path:line` separated by `;
 paths from the job root, e.g. `01_product/SSE001.qmd:342`), a comment is inserted
 above that line in a copy of the file:
 
-    inside an R chunk:   # REVIEW (issue 3, Minor): <title>
-    in prose or YAML:    <!-- REVIEW (issue 3, Major): <title> -->
+    inside an R chunk:   # REVIEW (Minor 1): <title>
+    in prose or YAML:    <!-- REVIEW (Major 2): <title> -->
+
+The label is the issue's number in the rendered form (Major and Minor issues are
+numbered separately), so a comment points at the form's item.
 
 The copy goes to <out-dir>/<file name with .REVIEW before the extension>; the
 delivered product is never edited. A note under the front matter says the copy is
@@ -63,6 +66,7 @@ def main(argv=None):
     root = os.path.dirname(ledger)
     out_dir = a.out_dir or os.path.join(root, "work", "annotated")
     led = iss.read_issues(ledger)
+    label_of = {id(i): lab for i, lab in zip(led["issues"], iss.form_labels(led["issues"]))}
     anchors = {}
     for i in led["issues"]:
         for anc in re.split(r"\s*;\s*", i["fields"].get("anchor", "").strip()):
@@ -88,8 +92,7 @@ def main(argv=None):
                 print(f"SKIP {rel}:{line_no}: outside the file ({len(lines)} lines)")
                 problems += 1
                 continue
-            sev = issue["fields"].get("severity", "").strip().capitalize() or "Issue"
-            text = f"REVIEW (issue {issue['number']}, {sev}): {issue['title']}"
+            text = f"REVIEW ({label_of[id(issue)]}): {issue['title']}"
             eng = engines[line_no - 1]
             target = lines[line_no - 1]
             pad = target[:len(target) - len(target.lstrip())]

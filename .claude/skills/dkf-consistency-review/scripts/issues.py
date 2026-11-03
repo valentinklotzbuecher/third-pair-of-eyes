@@ -177,6 +177,18 @@ def read_synthesis(path):
             "status": secs.get("status", "")}
 
 
+def form_labels(issues):
+    """Each issue's label as the rendered form lists it ("Major 2", "Minor 1"): issues
+    are numbered within their severity, in ledger order. One list, aligned with
+    `issues`, used by the form, the org form and the annotated source alike."""
+    seen, labels = {}, []
+    for i in issues:
+        sev = i["fields"].get("severity", "").strip().capitalize() or "Issue"
+        seen[sev] = seen.get(sev, 0) + 1
+        labels.append(f"{sev} {seen[sev]}")
+    return labels
+
+
 def default_severity(rows):
     """Default severity from the statement rows an issue carries."""
     sev = "Minor"

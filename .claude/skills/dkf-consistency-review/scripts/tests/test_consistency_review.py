@@ -354,7 +354,12 @@ def test_annotate_source(tmp_path, capsys):
     out = open(f"{j}/work/annotated/example.REVIEW.qmd", encoding="utf-8").read().split("\n")
     assert out[3].startswith("<!-- REVIEW: annotated copy")
     i5 = out.index("Text line five.")
-    assert out[i5 - 1] == "<!-- REVIEW (issue 2, Major): The dropout allowance multiplies instead of dividing -->"
+    assert out[i5 - 1] == "<!-- REVIEW (Major 2): The dropout allowance multiplies instead of dividing -->"
     i12 = out.index("res <- 4")
-    assert out[i12 - 1] == "# REVIEW (issue 1, Major): The control-group rate has no source"
+    assert out[i12 - 1] == "# REVIEW (Major 1): The control-group rate has no source"
     assert open(f"{j}/01_product/example.qmd", encoding="utf-8").read() == QMD
+
+
+def test_form_labels_number_within_severity():
+    issues = [{"fields": {"severity": s}} for s in ("Major", "Minor", "Major", "minor")]
+    assert iss.form_labels(issues) == ["Major 1", "Minor 1", "Major 2", "Minor 2"]

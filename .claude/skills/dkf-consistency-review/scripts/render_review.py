@@ -69,13 +69,14 @@ def build_markdown(led, final, problems):
     for ticked, label in iss.decision(led["issues"], led["answers"]):
         out.append(f"- [{'x' if ticked else ' '}] {label}")
     out += ["", "### General comments", "", secs.get("general comments", "").strip(), ""]
+    labels = iss.form_labels(led["issues"])
     for sev, title in (("Major", "Major issues"), ("Minor", "Minor issues")):
         out += [f"### {title}", ""]
-        items = [i for i in led["issues"]
-                 if i["fields"].get("severity", "").strip().capitalize() == sev]
+        items = [(int(lab.split()[-1]), i) for lab, i in zip(labels, led["issues"])
+                 if lab.split()[0] == sev]
         if not items:
             out += ["None identified.", ""]
-        for k, i in enumerate(items, 1):
+        for k, i in items:
             loc = i["fields"].get("location", "").strip()
             tag = []
             ch = i["fields"].get("change", "").strip().lower()
@@ -307,13 +308,14 @@ def build_org(led):
         out.append(f"- [{'X' if ticked else ' '}] {label}")
     out += ["***** General Comments"]
     out += [org_inline(ln) for ln in secs.get("general comments", "").strip().split("\n")]
+    labels = iss.form_labels(led["issues"])
     for sev, title in (("Major", "Major Issues"), ("Minor", "Minor Issues")):
         out.append(f"***** {title}")
-        for i in led["issues"]:
-            if i["fields"].get("severity", "").strip().capitalize() != sev:
+        for lab, i in zip(labels, led["issues"]):
+            if lab.split()[0] != sev:
                 continue
             loc = i["fields"].get("location", "").strip()
-            out.append(f"- *{org_inline(i['title'])}*" + (f" ({loc})" if loc else ""))
+            out.append(f"{lab.split()[-1]}. *{org_inline(i['title'])}*" + (f" ({loc})" if loc else ""))
             out += ["  " + org_inline(ln) if ln.strip() else "" for ln in i["body"].split("\n")]
     out.append("***** Answer to issues listed in 'Assignment'")
     for a in sorted(led["answers"], key=lambda a: a["q"] or 0):

@@ -157,6 +157,24 @@ def test_synthesis_counts_must_match_ledger(job, capsys):
     assert code == 1 and "header counts" in out
 
 
+def test_verdict_may_move_a_row_that_names_its_evidence(job, capsys):
+    p = os.path.join(job, "SYNTHESIS.md")
+    edit(p, "1 not established / 0 narrower / 1 hold", "1 not established / 1 narrower / 0 hold")
+    edit(p, "| primary | holds | 100 gives 80% | — | — | settled |",
+         "| primary | narrower | 100 gives 80% at the stated rate | moved: work/logs/rate.log | — | settled |")
+    code, out = gate(job, "verdict", capsys)
+    assert code == 0, out
+
+
+def test_moved_row_must_name_its_evidence(job, capsys):
+    p = os.path.join(job, "SYNTHESIS.md")
+    edit(p, "1 not established / 0 narrower / 1 hold", "1 not established / 1 narrower / 0 hold")
+    edit(p, "| primary | holds | 100 gives 80% | — | — | settled |",
+         "| primary | narrower | 100 gives 80% at the stated rate | — | — | settled |")
+    code, out = gate(job, "verdict", capsys)
+    assert code == 1 and "moves from 'holds' to 'narrower'" in out
+
+
 def test_synthesis_sections_in_order(job, capsys):
     p = os.path.join(job, "SYNTHESIS.md")
     text = open(p, encoding="utf-8").read()

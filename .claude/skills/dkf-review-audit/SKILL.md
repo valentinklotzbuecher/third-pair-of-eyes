@@ -10,7 +10,7 @@ description: >-
   an answer or the bottom line rests on goes back to the verdict stage. Declares the
   evidence handoff for the consistency review.
 metadata:
-  version: "0.1.0"
+  version: "0.1.1"
   based-on: "research_skills `audit-review` 0.9.1 (isitcredible/research_skills@766f28f)"
 ---
 

@@ -53,7 +53,7 @@ script or printed page wherever a row turns on it.
    re-runs that ruling's load-bearing script and you open the page it cites; say so
    where you do, with the log path.
 4. **A row that moves states why.** Every row whose `holds` differs from the statements
-   stage's names the evidence it turns on, in the row.
+   stage's names the evidence it turns on, with its path, in the row.
 5. **Limits are not findings.** A number that could not be checked because data were
    not shared, or a source the review could not obtain, is a limit on the review,
    listed under its own heading; it never appears as a fault of the product.
@@ -69,7 +69,7 @@ Write these sections, in this order, under the title
 
 1. **Header line**, directly under the title:
    `Verification: OPEN · <n> not established / <n> narrower / <n> hold`, counting the
-   statement-ledger rows by `holds`. `dkf-review-audit` replaces `OPEN` after it runs.
+   rows of this synthesis's `## Statement ledger` table by `Holds` (after any moves). `dkf-review-audit` replaces `OPEN` after it runs.
 2. **`## Status`**: `COMPLETE`, `INTERIM` (name what is open) or `BLOCKED`; the depth;
    whether the challenge stage ran; the data mode and what it left unverified.
 3. **`## What the product establishes and what it does not`**: the bottom line, in

@@ -119,6 +119,7 @@ SYNTHESIS_SECTIONS = [
     "Statement ledger", "Recomputation table", "Answers to the assignment questions",
     "Data and reproducibility", "Findings", "Limits of this review", "Counts",
 ]
+EVIDENCE_PATH = re.compile(r"\b(?:review|work|analysis|0\d_\w+)/[\w./-]+|\b[\w-]+/[\w./-]*\.\w{1,5}\b")
 HEADER = re.compile(r"^Verification:\s*(\w+)\s*·\s*(\d+)\s+not established\s*/\s*(\d+)\s+narrower"
                     r"\s*/\s*(\d+)\s+holds?\s*$")
 
@@ -463,17 +464,39 @@ def check_verdict(g, assign):
     header = next((ln.strip() for ln in lines[1:6] if ln.strip()), "")
     hm = HEADER.match(header)
     _, rows = ledger_rows(g, code="V1")
+    tables = jf.md_tables(text)
+    led = [t for t in tables if any(h.lower().startswith("statement") for h in t[0])
+           and any(h.lower() == "holds" for h in t[0])]
+    # The verdict's own ledger: row ID -> (holds, row text). The verdict may move a row
+    # from the statements stage's rating; the header counts this table, not the CSV.
+    table = {}
+    if led:
+        hdr, trows = led[0]
+        hi = [h.lower() for h in hdr].index("holds")
+        for tr in trows:
+            m = re.search(r"\b(ST\d+)\)?\s*$", tr[0]) or re.search(r"\b(ST\d+)\b", tr[0])
+            if m:
+                table[m.group(1)] = ((tr[hi] if hi < len(tr) else "").strip().lower(),
+                                     " | ".join(tr))
     if not hm:
         g.fail("V1", f"header line {header!r} is not `Verification: <word> · <n> not established "
                      "/ <n> narrower / <n> hold`.")
-    elif rows:
-        counts = {h: sum(1 for r in rows if (r.get('holds') or '').strip().lower() == h)
-                  for h in ("not established", "narrower", "holds")}
+    elif table or rows:
+        held = [h for h, _ in table.values()] if table else \
+            [(r.get("holds") or "").strip().lower() for r in rows]
+        counts = {h: held.count(h) for h in ("not established", "narrower", "holds")}
         printed = dict(zip(("not established", "narrower", "holds"), map(int, hm.group(2, 3, 4))))
         if printed != counts:
-            g.fail("V1", f"header counts {printed} differ from the ledger's {counts}.")
+            g.fail("V1", f"header counts {printed} differ from the statement-ledger table's "
+                         f"{counts}.")
         if hm.group(1).upper() not in ("OPEN", "TRUSTWORTHY", "UNSOUND"):
             g.fail("V1", f"Verification word {hm.group(1)!r} is not OPEN, TRUSTWORTHY or UNSOUND.")
+    staged = {r["row_id"].strip(): (r.get("holds") or "").strip().lower() for r in rows or []}
+    for rid, (h, rowtext) in sorted(table.items()):
+        before = staged.get(rid)
+        if before and h and h != before and not EVIDENCE_PATH.search(rowtext):
+            g.fail("V1", f"statement-ledger table: {rid} moves from {before!r} to {h!r} without "
+                         "naming the evidence it turns on (a path such as work/logs/<file>.log).")
     titles = [(lvl, t.strip()) for lvl, t, _ in jf.md_sections(g.path(rel))]
     h2 = [t for lvl, t in titles if lvl == 2]
     pos = -1
@@ -484,9 +507,6 @@ def check_verdict(g, assign):
         if h2.index(s) < pos:
             g.fail("V1", f"`## {s}` is out of order.")
         pos = h2.index(s)
-    tables = jf.md_tables(text)
-    led = [t for t in tables if any(h.lower().startswith("statement") for h in t[0])
-           and any(h.lower() == "holds" for h in t[0])]
     if not led:
         g.fail("V1", "SYNTHESIS.md has no statement-ledger table with a Holds column.")
     elif rows:

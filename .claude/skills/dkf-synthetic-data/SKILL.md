@@ -9,7 +9,7 @@ description: >-
   in data mode `synthetic`; also on its own, to program an analysis on dummy data
   before database lock or to make a codebook that can be shared.
 metadata:
-  version: "0.1.0"
+  version: "0.1.1"
 ---
 
 # Synthetic data for code review
