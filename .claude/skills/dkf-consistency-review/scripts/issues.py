@@ -15,6 +15,7 @@ ISSUES.md layout (see the skill's SKILL.md):
     ## Not checked                bullet list of the review's limits
 """
 import hashlib
+import json
 import os
 import re
 
@@ -175,6 +176,34 @@ def read_synthesis(path):
     header_line = next((ln.strip() for ln in body.split("\n") if ln.strip().startswith("Verification:")), "")
     return {"rows": rows, "blocks": blocks, "questions": questions, "header": header_line,
             "status": secs.get("status", "")}
+
+
+# Proportion, kept in step with dkf-review/scripts/jobfiles.py: a product of at most
+# SHORT_PAGES rendered pages is short. FORM_WORDS limits the words of ISSUES.md's
+# general comments, issues and answers; the gate fails above TOLERANCE times it.
+SHORT_PAGES = 10
+TOLERANCE = 1.25
+FORM_WORDS = {"short": 1000, "long": 3000}
+
+
+def size_class(root):
+    try:
+        with open(os.path.join(root, "review", "intake-scan.json"), encoding="utf-8") as fh:
+            scan = json.load(fh)
+    except (OSError, ValueError):
+        return "long"
+    pages = [int(str(r.get("pages", "")).strip()) for r in scan.get("pdfs", [])
+             if str(r.get("path", "")).replace("\\", "/").startswith("01_product/")
+             and str(r.get("pages", "")).strip().isdigit()]
+    return "short" if pages and sum(pages) <= SHORT_PAGES else "long"
+
+
+def form_words(led):
+    secs = led["sections"]
+    body = "\n".join(secs.get(k, "") if isinstance(secs.get(k, ""), str)
+                     else "\n".join(secs.get(k, []))
+                     for k in ("general comments", "issues", "answers to the assignment"))
+    return len(re.findall(r"\S+", body))
 
 
 def form_labels(issues):

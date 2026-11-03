@@ -6,6 +6,7 @@ sys.path). Nothing here opens a data file: the readers touch only the assignment
 intake, ledgers and reports the review itself writes, plus Quarto source text.
 """
 import csv
+import json
 import os
 import re
 
@@ -30,6 +31,45 @@ PACKET_DIRS = ("01_product", "02_governing", "03_previous", "04_data",
 
 PLACEHOLDER = re.compile(r"^\s*<[^>]*>\s*$")
 FIELD_LINE = re.compile(r"^\s*[-*]\s+([A-Za-z][A-Za-z ()/'-]*?)\s*:\s*(.*?)\s*$")
+
+
+# Proportion. A product of at most SHORT_PAGES rendered pages is "short"; its review
+# runs fewer agents and writes less. The limits are word targets the skills state; the
+# gates fail only above TOLERANCE times a limit, so a slightly long report is not
+# rewritten.
+SHORT_PAGES = 10
+TOLERANCE = 1.25
+WORD_LIMITS = {
+    "short": {"stage report": 1500, "module report": 600, "challenge report": 1500,
+              "synthesis": 3000},
+    "long": {"stage report": 4000, "module report": 2000, "challenge report": 4000,
+             "synthesis": 8000},
+}
+
+
+def product_pages(root):
+    """Rendered pages of the product's PDFs (under 01_product/), from the intake scan;
+    None when the scan or the page counts are missing."""
+    try:
+        with open(os.path.join(root, "review", "intake-scan.json"), encoding="utf-8") as fh:
+            scan = json.load(fh)
+    except (OSError, ValueError):
+        return None
+    pages = [int(str(r.get("pages", "")).strip()) for r in scan.get("pdfs", [])
+             if str(r.get("path", "")).replace("\\", "/").startswith("01_product/")
+             and str(r.get("pages", "")).strip().isdigit()]
+    return sum(pages) if pages else None
+
+
+def size_class(root):
+    """`short` for a product of at most SHORT_PAGES rendered pages, else `long` (also
+    when the page count is unknown, so an unknown size never tightens a limit)."""
+    n = product_pages(root)
+    return "short" if n is not None and n <= SHORT_PAGES else "long"
+
+
+def word_count(text):
+    return len(re.findall(r"\S+", text or ""))
 
 
 def is_placeholder(value):

@@ -18,13 +18,16 @@ for what was kept, adapted and replaced. The earlier single-call API prototype i
 The review is an aid to the human consistency review, not a replacement. It says what
 it checked, on what evidence, and what it could not check.
 
-**Status: version 0.1.0, no complete review yet.** A trial on one real SSE (7 pages,
-data mode `none`) ran the document stage and the code-and-data stage up to the
-clinical modules, and the problems it showed were fixed in the skills. The clinical
-modules, the statements, challenge, verdict and audit stages, the consistency-review
-form and the data modes `synthetic` and `shared` have not yet run to completion on a
-real product; their scripts are tested on fixtures only. Read the first reviews
-closely.
+**Status: version 0.2.0.** Two complete runs on a synthetic demonstration SSE with six
+planted issues (DEMO-TKA, two pages; kept outside this repository so no run can read
+its answer key) found all six, at depth `standard` with and without the clinical
+modules, and sized each one; one run also caught an error in the answer key. They
+also showed the cost: about 3.4 and 1.6 hours of model time, $72 and $27 at API list
+prices, and texts several times the length of the product. Version 0.2.0 answers that
+with a two-agent `quick` depth, modules worked through in the stage agent for short
+products, length limits that follow the product's size, and a thin coordinator; it
+has not yet been re-run on the demo. A trial on one real SSE ran the first two
+stages. The data modes `synthetic` and `shared` have not yet run on a real product.
 
 ## The skills
 
@@ -81,11 +84,13 @@ the current DKF rules before clearing anything beyond the default. Details:
 5. Read `jobs/<job>/CONSISTENCY_REVIEW.html` (and `work/annotated/*.REVIEW.qmd`), then
    edit the form as the human reviewer.
 
-**Depth.** `quick` (no challenge stage; core modules only) for a short SSE or a
-re-review; `standard` (default) for a first review; `full` adds the audit, for
-high-risk products. A full multi-agent review runs many agent turns and costs one to
-two orders of magnitude more than the single-call prototype did; measure on your own
-products before routine use.
+**Depth.** `quick` for a short SSE or a re-review: two agents (a review agent for the
+first three stages, a fresh verdict agent that also writes the form) and no challenge
+stage. `standard` (default) for a first review: one agent per stage and the challenge.
+`full` adds the audit, for high-risk products. A product of at most 10 rendered pages
+counts as short: its review writes less (a form of about 1,000 words) and works the
+clinical modules into the code-and-data agent. Measure on your own products before
+routine use.
 
 **Running on a Claude subscription.** The skills run inside Claude Code, so a review
 counts against your subscription's usage limits instead of API credits, as long as
@@ -96,11 +101,12 @@ Claude Code is logged in with the subscription:
   The old prototype put the key in `~/.Renviron`, and a terminal opened from RStudio
   can inherit it. Remove it from the environment Claude Code starts in, and check
   `/status` before a run.
-- Usage limits are per session window and per week. In the trial on a 7-page SSE,
-  each stage used about 0.5M tokens, and four module agents running in parallel used
-  up a session's allowance, so module agents now run one at a time unless you ask
-  otherwise. Use depth `quick` for routine SSEs, and resume a run stopped by the limit
-  once it resets (step 4).
+- Usage limits are per session window and per week. Check your usage (`/usage`)
+  before a run. On the demo SSE, a `standard` run without modules used about one
+  5-hour window of active work on our account; one run started with the weekly window at 97% and
+  then waited four days. Start with room to spare, never run two reviews at once on
+  one account, prefer `quick` for routine SSEs, and resume a stopped run from its
+  `PROGRESS.md` once the limit resets (step 4).
 - Data terms depend on the plan. On personal plans (Pro, Max), whether chats and
   coding sessions may be used for model training is a privacy setting
   ([Anthropic's consumer terms](https://www.anthropic.com/news/updates-to-our-consumer-terms));

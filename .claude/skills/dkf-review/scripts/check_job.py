@@ -12,7 +12,8 @@ intake (also run by every later stage)
   I1  00_INTAKE.md exists, records `Suite version:`, the data mode and the depth, and
       numbers the assignment questions Q1, Q2, …; AGENTS.md and PROGRESS.md exist.
       They are written before any stage work.
-stage reports (every stage report and module report)
+stage reports (every stage report and module report; each within its length
+limit for the product's size class, failing above 1.25 times it)
   R1  `## Status`, `## Findings`, `## Leads for later stages`, `## Scope assumptions`
       and `## Coverage` sections; every `### <ID>. <title>` finding block carries
       `bears on:` and `evidence:` lines (missing `where:` or `fix:` WARN).
@@ -62,6 +63,7 @@ statements
 challenge (depth standard and full only)
   X1  review/challenge-REPORT*.md exists with sections (a) to (g).
 verdict
+  V2  SYNTHESIS.md within its length limit (see Proportion in ../SKILL.md).
   V1  SYNTHESIS.md: title, header line `Verification: <word> · <n> not established /
       <n> narrower / <n> hold` matching the ledger counts; the required sections in
       order; the statement-ledger table carries every ledger ID, with valid Holds;
@@ -175,7 +177,20 @@ class Gate:
                 self.fail(code, f"{rel} has no `## {s}` section.")
         text = open(self.path(rel), encoding="utf-8").read()
         self.finding_fields(code, rel, text)
+        self.length(code, rel, text, "module report" if rel.startswith("analysis/")
+                    else "stage report")
         return text
+
+    def length(self, code, rel, text, kind):
+        """Proportion: a report or synthesis longer than TOLERANCE times its limit for
+        the product's size class fails."""
+        size = jf.size_class(self.root)
+        limit = jf.WORD_LIMITS[size][kind]
+        n = jf.word_count(text)
+        if n > limit * jf.TOLERANCE:
+            self.fail(code, f"{rel} is {n} words; a {kind} for a {size} product is at most "
+                            f"about {limit} (fails above {int(limit * jf.TOLERANCE)}). Cut "
+                            "repetition and narrative, not checks or evidence paths.")
 
     def finding_fields(self, code, rel, text):
         """Every `### <ID>. <title>` block under `## Findings` names what it bears on
@@ -446,10 +461,12 @@ def check_challenge(g, assign):
                      "INTERIM.")
         return
     for p in reports:
-        text = open(p, encoding="utf-8").read().lower()
+        raw = open(p, encoding="utf-8").read()
+        text = raw.lower()
         for part in ("(a)", "(b)", "(c)", "(d)", "(e)", "(f)", "(g)"):
             if part not in text:
                 g.fail("X1", f"{os.path.relpath(p, g.root)} lacks part {part}.")
+        g.length("X1", os.path.relpath(p, g.root), raw, "challenge report")
 
 
 def check_verdict(g, assign):
@@ -459,6 +476,7 @@ def check_verdict(g, assign):
         return
     text = open(g.path(rel), encoding="utf-8").read()
     lines = text.splitlines()
+    g.length("V2", rel, text, "synthesis")
     if not lines or not lines[0].startswith("# Synthesis"):
         g.fail("V1", "SYNTHESIS.md does not start with `# Synthesis — …`.")
     header = next((ln.strip() for ln in lines[1:6] if ln.strip()), "")

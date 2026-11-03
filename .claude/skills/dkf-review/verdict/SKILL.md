@@ -62,6 +62,15 @@ script or printed page wherever a row turns on it.
    row or finding ID as a noun. State findings, not what the review did. Every number
    traces to a report, log or printed page in the job tree; give the path.
 
+7. **Proportion.** `SYNTHESIS.md` stays within its length (at most about 3,000 words
+   for a short product, 8,000 for a long one; Proportion in `../SKILL.md`): ledger
+   cells a phrase each, a sentence where a cell needs a reason; each finding in a few
+   lines with its evidence paths. Detail stays in the stage reports the synthesis
+   cites.
+8. **At depth `quick`** you also compile the consistency review: once `SYNTHESIS.md`
+   passes its gate, run `dkf-consistency-review` steps 0 to 6; its verify pass runs in
+   a fresh context.
+
 ## SYNTHESIS.md
 
 Write these sections, in this order, under the title

@@ -11,10 +11,13 @@ the user guide. The earlier API prototype is in `archive/` and is not maintained
   or copy job contents elsewhere. The one exception is a synthetic demonstration
   product the user names (such as DEMO-TKA from `scto-ai-review`): its review outputs
   may be copied where the user asks.
-- **Before starting a review of a real product, confirm with the user**: a
-  standard-depth review runs many agent turns for tens of minutes or longer and costs
-  far more than a single model call. Say which depth and data mode the assignment
-  sets. This is the coordinating session's job, done once before any stage agent is
+- **Before starting any review, confirm with the user**, a synthetic product
+  included: a review runs many agent turns, and a `standard` review of a short SSE
+  needs about one 5-hour usage window of active work. Say which depth and data mode
+  the assignment sets and the product's size class from the clearance scan, and ask
+  the user to check their usage (`/usage`): suggest waiting or depth `quick` when the
+  weekly window is above about 70%, and never start a second review while one runs on
+  the same account. This is the coordinating session's job, done once before any stage agent is
   dispatched; stage agents do not ask, and write anything they need from the user
   under "Requests for the operator" in the job's `00_INTAKE.md`.
 - **Billing.** Reviews are meant to run on the Claude subscription Claude Code is

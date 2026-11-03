@@ -423,6 +423,11 @@ def main(argv=None):
     for p in prod_pdfs:
         print(f"PDF {p['path']}: {p.get('pages', '?')} pages, created {p.get('creationdate', '?')}, "
               f"R {p.get('r_version', '?')}, footer rev {p.get('footer_revision', '—')}")
+    pages = [int(p["pages"]) for p in prod_pdfs if str(p.get("pages", "")).isdigit()]
+    if pages:
+        size = "short" if sum(pages) <= jf.SHORT_PAGES else "long"
+        print(f"Size class: {size} ({sum(pages)} rendered pages; Proportion in the dkf-review "
+              "skill sets the agents and the length limits)")
     for w in warnings:
         print(f"WARN {w}")
     for e in errors:

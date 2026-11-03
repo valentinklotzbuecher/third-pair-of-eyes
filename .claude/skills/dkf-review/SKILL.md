@@ -11,7 +11,7 @@ description: >-
   what the product establishes. Use when asked to review, check or consistency-review
   a statistical product, an SSE, a SAP or a statistical report.
 metadata:
-  version: "0.1.1"
+  version: "0.2.0"
   based-on: "research_skills `review` 0.9.1 (isitcredible/research_skills@766f28f)"
 ---
 
@@ -249,11 +249,30 @@ consistency checks of rule 5 still run on it.
 
 ## Depth
 
-| Depth | What runs | Typical use |
+| Depth | Agents | What runs | Typical use |
+|---|---|---|---|
+| `quick` | two, then the form's verify pass | a **review agent** runs document, code-and-data (the profile's core modules worked through in the same agent) and statements, each with its report and gate; a fresh **verdict agent** writes `SYNTHESIS.md` and compiles the consistency review. No challenge stage, which the synthesis states in its status | a short product (an SSE, a protocol statistics section); a re-review of a revised product |
+| `standard` (default) | one per stage, then the form's compile and verify | all five stages and every module whose condition holds: worked through in the code-and-data agent for a short product, as their own agents one at a time for a long one | a first review |
+| `full` | standard, then `dkf-review-audit` | standard, and the audit before the consistency review | high-risk products: confirmatory reports, high DKF risk, strong influence on the protocol |
+
+## Proportion
+
+A review is read by a colleague in the time a review takes. Its size follows the
+product's, by size class: **short** is at most 10 rendered pages (the intake scan's
+page count of the PDFs in `01_product/`), **long** is anything larger or of unknown
+size (`scripts/jobfiles.py`, `size_class`).
+
+| Words, at most about | Short | Long |
 |---|---|---|
-| `quick` | document, code-and-data (core checks and the profile's core modules), statements, verdict; no challenge stage, which the synthesis states in its status | a short SSE; a re-review of a revised product |
-| `standard` (default) | all five stages, every module whose condition holds | a first review |
-| `full` | standard, then `dkf-review-audit` before the consistency review | high-risk products: confirmatory reports, high DKF risk, strong influence on the protocol |
+| Stage report (document, code-and-data, statements) | 1,500 | 4,000 |
+| Module report | 600 | 2,000 |
+| Challenge report | 1,500 | 4,000 |
+| `SYNTHESIS.md` | 3,000 | 8,000 |
+| The form's general comments, issues and answers | 1,000 | 3,000 |
+
+The gates fail a text above 1.25 times its limit. Cut repetition and narrative, never
+a check, a number or an evidence path; detail that does not fit stays in the work files
+the text points to. For a short product the statement ledger keeps at most 15 rows.
 
 ## Stages
 
@@ -288,7 +307,9 @@ artifacts. Applicability is decided per result family or calculation
    counts. It never sees the coordinator's reasoning. Nothing re-decides after it.
 
 Then, at depth `full`, `dkf-review-audit`; then `dkf-consistency-review` compiles the
-consistency review in the DKF form.
+consistency review in the DKF form. At depth `quick` the first three stages run in one
+review agent, each still ending with its report and gate, and the verdict agent
+compiles the consistency review after its own gate passes.
 
 ## Stage reports
 
@@ -335,12 +356,20 @@ from it goes into `SYNTHESIS.md`.
   access), shim the loader to the installed versions, log the shim and the version
   differences against the render environment read at intake, and record it as a scope
   assumption.
-- Dispatch each stage, and each fired module, to its own subagent where the harness
-  supports it; otherwise run them as serial passes. Check what exists before spawning:
-  a module dropped because a spawn failed is a silent gap.
+- Dispatch the agents Depth names: at `quick` two, at `standard` and `full` one per
+  stage, and for a long product one per fired module, one at a time. Where the harness
+  has no subagents, run them as serial passes. Check what exists before spawning: a
+  module dropped because a spawn failed is a silent gap.
+- **Usage.** A run on a subscription stops at the account's usage limits and resumes
+  from `PROGRESS.md`. Never start two reviews at once on one account; record each wait
+  under Running in `PROGRESS.md`.
 - One continuous run. The sanctioned pauses are a clearance failure and a missing
   product. Unattended, resolve every other question by rule: record the call and the
   reason in the artifact it touches, and continue.
+- **Analytic first.** Where an exact or closed-form calculation answers the question,
+  compute it, and simulate only to confirm at the points that decide (a Monte Carlo
+  standard error of at most 1 point at 80% power needs about 1,600 trials); never
+  re-run a whole grid at high replicate counts.
 - Size long computations to the machine (fewer Monte Carlo replicates for a code-path
   check, the full count only where a number is compared), launch them in the
   background with start and end markers in the log, and check for live processes
@@ -367,12 +396,16 @@ handles which kind of task; where nothing is set, every agent uses the session's
   module report, the statement ledger, the challenge and the verdict) go to the model
   it assigns to verdicts. A mechanical worker reports what it found (match or
   mismatch, the number, the file); it does not rate a statement.
-- **Brief each agent for one bounded job** (a module, a group of result families, a
-  list of arithmetic checks) that it can finish in well under a hundred tool calls. An
-  agent past about eighty calls with work left writes its findings to their files and
-  its state to `PROGRESS.md`, and stops; a fresh agent resumes from `PROGRESS.md`.
+- **Brief each agent for one bounded job** (a stage, a module, a group of result
+  families) with a tool-call budget: for a short product about 50 for a stage agent
+  and about 120 for the `quick` review agent; for a long product about 80 for a stage
+  agent. An agent past 1.25 times its budget with work left writes its findings to
+  their files and its state to `PROGRESS.md`, and stops; a fresh agent resumes from
+  `PROGRESS.md`.
 - **The coordinator stays thin.** The agent that dispatches stages and modules reads
-  their reports and gate outputs, not their logs, scripts or page dumps.
+  gate outputs and each report's `## Status`, never a stage's logs, scripts or page
+  dumps. It never re-runs a stage's scripts and never re-decides a ruling: a doubt goes
+  to a fresh worker with the script's path. Briefs name paths; they never paste files.
 - **A subagent the harness bars from writing files** returns its report text in full;
   the coordinator saves it unchanged at the report's path.
 - **Never hold a large context across a wait.** Size each computation to finish in

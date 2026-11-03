@@ -1,3 +1,4 @@
+import json
 import os
 import re
 import sys
@@ -363,3 +364,17 @@ def test_annotate_source(tmp_path, capsys):
 def test_form_labels_number_within_severity():
     issues = [{"fields": {"severity": s}} for s in ("Major", "Minor", "Major", "minor")]
     assert iss.form_labels(issues) == ["Major 1", "Minor 1", "Major 2", "Minor 2"]
+
+
+def test_form_length_limit_for_a_short_product(tmp_path, capsys):
+    j = make(tmp_path)
+    os.makedirs(f"{j}/review", exist_ok=True)
+    with open(f"{j}/review/intake-scan.json", "w", encoding="utf-8") as fh:
+        json.dump({"pdfs": [{"path": "01_product/example.pdf", "pages": "2"}]}, fh)
+    assert check_issue_coverage.main([f"{j}/ISSUES.md"]) == 0, capsys.readouterr().out
+    text = open(f"{j}/ISSUES.md", encoding="utf-8").read()
+    text = text.replace("## Answers to the assignment", "Padding " + "word " * 1400 + "\n\n## Answers to the assignment", 1)
+    with open(f"{j}/ISSUES.md", "w", encoding="utf-8") as fh:
+        fh.write(text)
+    assert check_issue_coverage.main([f"{j}/ISSUES.md"]) == 1
+    assert "the form for a short product" in capsys.readouterr().out

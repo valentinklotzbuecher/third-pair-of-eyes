@@ -1,3 +1,4 @@
+import json
 import os
 import re
 import sys
@@ -8,6 +9,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import pytest  # noqa: E402
 
 import check_job  # noqa: E402
+import jobfiles as jf  # noqa: E402
 from jobfixture import make_job, write  # noqa: E402
 
 
@@ -269,3 +271,38 @@ def test_module_walk_missing_row(job, capsys):
     edit(p, "| prediction-model-diagnostics | not applicable | no such feature |\n", "")
     code, out = gate(job, "code-and-data", capsys)
     assert code == 1 and "no row for prediction-model-diagnostics" in out
+
+
+def short_product(root, pages=2):
+    write(os.path.join(root, "review/intake-scan.json"),
+          json.dumps({"pdfs": [{"path": "01_product/example.pdf", "pages": str(pages)}]}))
+
+
+def test_size_class_from_intake_scan(job):
+    assert jf.size_class(job) in ("short", "long")
+    short_product(job, 2)
+    assert jf.size_class(job) == "short"
+    short_product(job, 25)
+    assert jf.size_class(job) == "long"
+    os.remove(os.path.join(job, "review/intake-scan.json"))
+    assert jf.size_class(job) == "long"
+
+
+def test_long_report_fails_only_for_a_short_product(job, capsys):
+    p = os.path.join(job, "review/document-REPORT.md")
+    with open(p, "a", encoding="utf-8") as fh:
+        fh.write("\n" + "word " * 2000 + "\n")
+    short_product(job, 2)
+    code, out = gate(job, "document", capsys)
+    assert code == 1 and "a stage report for a short product" in out
+    short_product(job, 40)
+    code, out = gate(job, "document", capsys)
+    assert "a stage report for a" not in out
+
+
+def test_long_synthesis_fails_for_a_short_product(job, capsys):
+    short_product(job, 2)
+    with open(os.path.join(job, "SYNTHESIS.md"), "a", encoding="utf-8") as fh:
+        fh.write("\n" + "word " * 4000 + "\n")
+    code, out = gate(job, "verdict", capsys)
+    assert code == 1 and "V2" in out and "a synthesis for a short product" in out

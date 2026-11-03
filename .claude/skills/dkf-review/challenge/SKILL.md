@@ -52,6 +52,10 @@ one.
    and table, or `file.qmd:line`. A ruling with neither is not a ruling. The
    `dkf-review` rules bind you (`../SKILL.md`, especially 4, 6, 8 and 11).
 4. Check each document's title page and revision before citing it.
+5. **Rebuild analytically first.** Where an exact or closed-form calculation decides a
+   ruling, use it; simulate only to confirm at the points that decide, at the precision
+   the ruling needs. The report stays within its length (Proportion in `../SKILL.md`):
+   rulings and their evidence, not a retelling of the review.
 
 ## Where reviews err against the author
 

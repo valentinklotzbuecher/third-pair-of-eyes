@@ -9,7 +9,7 @@ description: >-
   comments into a copy of the Quarto source. Use when asked for "the consistency
   review", "the review form", "the reviewer's draft" or to "write up the review".
 metadata:
-  version: "0.1.1"
+  version: "0.2.0"
   based-on: "research_skills `review-digest` 0.9.1 (isitcredible/research_skills@766f28f)"
 ---
 
@@ -59,6 +59,10 @@ skill's directory.
      `file.qmd:line` for code), the evidence with its numbers, why it matters for the
      product's statements, and ends with the fix (from the finding's `fix:` line).
      Three to eight sentences; no hedging beyond what the evidence carries.
+   - **Proportion.** The general comments, issues and answers stay within the form's
+     length: at most about 1,000 words for a product of at most 10 rendered pages,
+     3,000 for a longer one; the coverage gate fails above 1.25 times it. The numbers
+     a colleague needs to act go in the issue; the rest stays in `SYNTHESIS.md`.
    - **Severity**: the default below, or a departure with `severity-reason:`.
      **change**: from the mapped findings' `where:` (`text`, `code`, `text and code`;
      `none` only for a pure question). **clarification: yes** when a mapped finding's

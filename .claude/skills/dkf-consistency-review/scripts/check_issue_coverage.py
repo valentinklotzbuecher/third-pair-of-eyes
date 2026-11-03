@@ -17,6 +17,8 @@ Dispositions live in ISSUES.coverage.md, one per line, the id in backticks:
   `F7` → not checked             `F8` → general comments   `F9` — excluded: <reason>
 
 FAIL (exit 1):
+  - the general comments, issues and answers longer than 1.25 times the form's
+    length limit for the product's size class (issues.FORM_WORDS);
   - a declared finding with no disposition, or a disposition naming an issue that
     does not exist;
   - a primary or supporting statement row that does not hold, mapped only to
@@ -82,6 +84,13 @@ def main(argv=None):
     syn = iss.read_synthesis(syn_path)
     disp = read_dispositions(os.path.join(root, "ISSUES.coverage.md"))
     fails, warns = [], []
+    size = iss.size_class(root)
+    limit, n = iss.FORM_WORDS[size], iss.form_words(led)
+    if n > limit * iss.TOLERANCE:
+        fails.append(f"the general comments, issues and answers run to {n} words; the form "
+                     f"for a {size} product is at most about {limit} (fails above "
+                     f"{int(limit * iss.TOLERANCE)}). Shorten the issue bodies to the problem, "
+                     "its evidence and the fix; detail stays in SYNTHESIS.md")
     numbers = {i["number"] for i in led["issues"]}
     rows = {r["id"]: r for r in syn["rows"] if r.get("id")}
 

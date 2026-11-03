@@ -38,7 +38,8 @@ Go through the product's summary, conclusions and the sections its profile names
 (`../references/product-profiles.md`) sentence by sentence, then the tables those
 sentences rest on. One row per load-bearing statement, in `review/statements-REPORT.md`
 and `analysis/statements/statement-ledger.csv` (template
-`../assets/statement-ledger.csv`):
+`../assets/statement-ledger.csv`). For a short product keep at most 15 rows: fold
+statements that stand or fall together into one row:
 
 `row_id | kind | statement | location | centrality | holds | kernel | not_established |
 strongest_defence | defence_tested | status | evidence`

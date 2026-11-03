@@ -265,10 +265,12 @@ otherwise only as far as reconciling the run with the print needs.
    | Fewer than about 50 evaluable participants per arm or 40 clusters at the planned or achieved size; a pilot or feasibility study; a load-bearing null | `small-n-diagnostics` |
    | Difference-in-differences, regression discontinuity, instrumental variables, interrupted time series, synthetic control | the upstream `research_skills` module for the design if installed beside this suite; otherwise `NOT_RUN` with that reason |
 
-   **Fired modules as separate agents.** The stage agent does A–D and the walk; the
-   fired modules then run, in parallel or one at a time as the operator sets; the stage
-   agent resumes to fold them in, finish its report and run the gate. Each module agent
-   writes its own report, puts its leads under that report's
+   **Fired modules.** For a short product (Proportion in `../SKILL.md`) the stage agent
+   works through each fired module itself after the walk, writing each module's report
+   at `analysis/code-and-data/<module>-REPORT.md` (at most about 600 words). For a long
+   product the fired modules run as their own agents, one at a time, after A–D and the
+   walk; the stage agent resumes to fold them in, finish its report and run the gate.
+   Each module, in either form, writes its own report, puts its leads under that report's
    `## Leads for later stages`, keeps scripts and logs in `work/scripts/` and
    `work/logs/` with names prefixed by the module, and appends its rows to
    `results.csv` and `battery-manifest.csv` under a file lock
