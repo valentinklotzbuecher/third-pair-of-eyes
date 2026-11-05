@@ -44,6 +44,10 @@ is the reference for good practice, not a requirement; a finding citing it says 
 | Observational studies | STROBE, von Elm E, et al. Lancet 2007;370:1453–1457 |
 | Target trial emulation | TARGET statement (JAMA and BMJ, 2025) |
 | Prediction models | TRIPOD+AI, Collins GS, et al. BMJ 2024;385:e078378 |
+
+SPIRIT 2025 and CONSORT 2025 renumbered their items. Cite an item by its 2025 number
+only after checking it in the 2025 checklist, or name the item instead ("SPIRIT 2025,
+sample size"). SPIRIT 2025's sample size item is 19 (14 in SPIRIT 2013).
 | Diagnostic accuracy | STARD 2015, Bossuyt PM, et al. BMJ 2015;351:h5527 |
 | Choosing the target difference | DELTA², Cook JA, et al. BMJ 2018;363:k3750 |
 
