@@ -10,6 +10,7 @@ import pytest  # noqa: E402
 
 import check_job  # noqa: E402
 import jobfiles as jf  # noqa: E402
+import new_job  # noqa: E402
 from jobfixture import make_job, write  # noqa: E402
 
 
@@ -306,3 +307,26 @@ def test_long_synthesis_fails_for_a_short_product(job, capsys):
         fh.write("\n" + "word " * 4000 + "\n")
     code, out = gate(job, "verdict", capsys)
     assert code == 1 and "V2" in out and "a synthesis for a short product" in out
+
+
+def test_new_job_writes_the_job_gitignore_once(tmp_path, capsys):
+    j = tmp_path / "review" / "2026-11-12_quick"
+    assert new_job.main([str(j)]) == 0
+    text = open(j / ".gitignore", encoding="utf-8").read()
+    for line in ("01_product/", "02_governing/", "04_data/", "lit/", "*.sas7bdat"):
+        assert line in text.split("\n")
+    write(str(j / ".gitignore"), "custom\n")
+    assert new_job.main([str(j)]) == 0
+    assert open(j / ".gitignore", encoding="utf-8").read() == "custom\n"
+
+
+def test_shared_mode_job_keeps_work_files_out_of_commits(tmp_path, capsys):
+    j = make_job(tmp_path / "job", mode="shared", clearance="approved by the PI, 2026-11-01")
+    template = open(os.path.join(os.path.dirname(check_job.__file__), "..", "assets",
+                                 "job-gitignore"), encoding="utf-8").read()
+    write(os.path.join(j, ".gitignore"), template)
+    code, out = gate(j, "intake", capsys)
+    assert "I2" in out and "work/logs/" in out
+    write(os.path.join(j, ".gitignore"), template.replace("# work/", "work/"))
+    code, out = gate(j, "intake", capsys)
+    assert "I2" not in out

@@ -12,6 +12,8 @@ intake (also run by every later stage)
   I1  00_INTAKE.md exists, records `Suite version:`, the data mode and the depth, and
       numbers the assignment questions Q1, Q2, …; AGENTS.md and PROGRESS.md exist.
       They are written before any stage work.
+  I2  In data mode shared, a job with a .gitignore keeps work/logs, work/results,
+      work/challenge and work/pkg out of commits (the job's shared-mode block).
 stage reports (every stage report and module report; each within its length
 limit for the product's size class, failing above 1.25 times it)
   R1  `## Status`, `## Findings`, `## Leads for later stages`, `## Scope assumptions`
@@ -121,6 +123,7 @@ SYNTHESIS_SECTIONS = [
     "Statement ledger", "Recomputation table", "Answers to the assignment questions",
     "Data and reproducibility", "Findings", "Limits of this review", "Counts",
 ]
+SHARED_IGNORE = ("work/logs/", "work/results/", "work/challenge/", "work/pkg/")
 EVIDENCE_PATH = re.compile(r"\b(?:review|work|analysis|0\d_\w+)/[\w./-]+|\b[\w-]+/[\w./-]*\.\w{1,5}\b")
 HEADER = re.compile(r"^Verification:\s*(\w+)\s*·\s*(\d+)\s+not established\s*/\s*(\d+)\s+narrower"
                     r"\s*/\s*(\d+)\s+holds?\s*$")
@@ -230,6 +233,14 @@ def check_intake(g, assign):
     for rel in ("AGENTS.md", "PROGRESS.md"):
         if not g.exists(rel) or os.path.getsize(g.path(rel)) == 0:
             g.fail("I1", f"{rel} is missing or empty.")
+    if jf.data_mode(assign) == "shared" and g.exists(".gitignore"):
+        active = {ln.strip() for ln in open(g.path(".gitignore"), encoding="utf-8")
+                  if ln.strip() and not ln.lstrip().startswith("#")}
+        missing = [p for p in SHARED_IGNORE if p not in active]
+        if missing:
+            g.fail("I2", f".gitignore lets {', '.join(missing)} into commits: in data mode "
+                         "shared the review's work files may hold values derived from patient "
+                         "data. Activate the shared-mode block of the job's .gitignore.")
 
 
 def none_found_rule(g, code, rel, rows, col):

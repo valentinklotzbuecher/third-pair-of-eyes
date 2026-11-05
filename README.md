@@ -62,27 +62,47 @@ the current DKF rules before clearing anything beyond the default. Details:
 
 ## Running a review
 
-1. Clone this repository and start Claude Code in it (`claude`); the skills in
-   `.claude/skills/` load automatically.
-2. Create a job folder (job folders under `jobs/` are never committed):
+A review lives with the product: its job folder sits in the product's own repository
+and is committed there. This repository only provides the skills and stays free of
+reviews (its `jobs/` folder is for trials and the synthetic demo, and is git-ignored).
+
+1. **Make the skills available.** In a Claude Code session on the web, select both the
+   product's repository and this one. Locally, link the four skill folders into your
+   user skills once:
 
    ```bash
-   python3 .claude/skills/dkf-review/scripts/new_job.py jobs/2026-10_SSE001_NIR \
-     --product path/to/SSE001_NIR.qmd path/to/SSE001_NIR.pdf \
-     --governing path/to/protocol_v1.2.pdf
+   mkdir -p ~/.claude/skills
+   for s in dkf-review dkf-review-audit dkf-consistency-review dkf-synthetic-data; do
+     ln -s "$PWD/.claude/skills/$s" ~/.claude/skills/$s
+   done
    ```
 
-   A product with other files its source reads (saved simulation results, a
-   `_quarto.yml`) is given as its folder: `--product path/to/product_folder/`.
-3. Fill in `jobs/<job>/00_ASSIGNMENT.md`: product type, the questions for the
-   reviewer, the documents it depends on, what is cleared, the data mode, the depth.
-4. Ask the agent: *"Review the product in jobs/2026-10_SSE001_NIR with dkf-review, then
-   write the consistency review."* It runs the clearance scan first and stops on any
-   problem, then states the depth and data mode the assignment sets and waits for your
-   go-ahead. A run that stops part-way (a usage limit, a closed session) continues
-   when you ask the agent to resume the job; it reads `jobs/<job>/PROGRESS.md` first.
-5. Read `jobs/<job>/CONSISTENCY_REVIEW.html` (and `work/annotated/*.REVIEW.qmd`), then
-   edit the form as the human reviewer.
+   Products held outside GitHub (SVN, a network drive) are reviewed locally.
+2. **Create the job beside the product**, from the product's repository:
+
+   ```bash
+   python3 ~/.claude/skills/dkf-review/scripts/new_job.py review/2026-11-12_quick \
+     --product SSE001.qmd SSE001.pdf --governing ../protocol/protocol_v1.2.pdf
+   ```
+
+   A product whose source reads other files (saved simulation results, a
+   `_quarto.yml`) is given as its folder: `--product path/to/product_folder/`. The job
+   gets its own `.gitignore`, which keeps copies of the product and its documents,
+   literature and any data out of every commit.
+3. **Fill in `00_ASSIGNMENT.md`**: product type, the questions for the reviewer, the
+   documents it depends on, what is cleared, the data mode, the depth.
+4. **Ask the agent**: *"Review the product in review/2026-11-12_quick with dkf-review,
+   then write the consistency review."* It runs the clearance scan, states the depth,
+   data mode and size class, asks you to check your usage, and waits for your go-ahead.
+   A run that stops part-way resumes from the job's `PROGRESS.md`.
+5. **Commit the job folder** in the product's repository.
+6. **The human reviewer** starts from the job's `REVIEWER.md`: the form
+   (`CONSISTENCY_REVIEW.html`, editable as `.org`), the source with `REVIEW` comments
+   (`work/annotated/`), links from each issue to the scripts and logs behind it, and
+   `DISPOSITIONS.md`, where the reviewer marks each issue kept, edited or dropped.
+   Questions go to Claude Code opened in the job folder: it answers from the evidence,
+   re-runs with changed inputs in `work/followup/`, and changes the form only when
+   asked.
 
 **Depth.** `quick` for a short SSE or a re-review: two agents (a review agent for the
 first three stages, a fresh verdict agent that also writes the form) and no challenge
@@ -130,7 +150,7 @@ Claude Code is logged in with the subscription:
 
 ```
 .claude/skills/        the four skills, LICENSE-research_skills, UPSTREAM.md
-jobs/                  review jobs (git-ignored; one folder per product review)
+jobs/                  trial and demo jobs only (git-ignored)
 tools/upstream_diff.sh what changed upstream since the fork
 archive/               the earlier API prototype
 CLAUDE.md              instructions for Claude Code in this repository

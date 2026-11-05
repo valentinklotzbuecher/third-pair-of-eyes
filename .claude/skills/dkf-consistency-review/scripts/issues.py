@@ -206,6 +206,75 @@ def form_words(led):
     return len(re.findall(r"\S+", body))
 
 
+# Evidence links. A file in an issue's `sources:` is linked from the form when it exists
+# in the job and would be committed with it: never a copy of the product, its documents,
+# literature or data (kept in step with dkf-review/assets/job-gitignore).
+NEVER_LINKED = ("01_product/", "02_governing/", "03_previous/", "04_data/", "05_synthetic/",
+                "lit/", "work/synthetic/", "review/extracts/")
+COPY_EXTENSIONS = (".qmd", ".pdf", ".docx", ".html")
+DATA_EXTENSIONS = (".sas7bdat", ".sav", ".dta", ".xpt", ".parquet", ".feather", ".rds",
+                   ".rda", ".rdata", ".xls", ".xlsx")
+
+
+def linkable(root, rel):
+    rel = rel.strip().replace("\\", "/").lstrip("./")
+    low = rel.lower()
+    if not rel or rel.startswith(NEVER_LINKED) or low.endswith(DATA_EXTENSIONS):
+        return False
+    if rel.startswith("work/pkg/") and low.endswith(COPY_EXTENSIONS):
+        return False
+    return os.path.isfile(os.path.join(root, rel))
+
+
+def evidence(root, issue):
+    """The files behind one issue, from its `sources:` field, that the form may link."""
+    out = []
+    for rel in re.split(r"[;,]", issue["fields"].get("sources", "")):
+        rel = re.sub(r"\s.*$", "", rel.strip()).replace("\\", "/").lstrip("./")
+        if rel and rel not in out and linkable(root, rel):
+            out.append(rel)
+    return out
+
+
+# Dispositions: the human reviewer's decision on each issue, one line per form label,
+# `- Major 1: kept`, `- Minor 2: edited — <reason>`, `- Major 3: dropped — <reason>`,
+# with the issue's title on the next line.
+DECISIONS = ("kept", "edited", "dropped")
+DISP_LINE = re.compile(r"^-\s+(Major|Minor)\s+(\d+)\s*:\s*([A-Za-z]+)\s*(?:[—–-]+\s*(.*?))?\s*$")
+
+
+def dispositions_template(led):
+    product = led["meta"].get("product") or "statistical product"
+    out = [f"# Dispositions: {product}", "",
+           "For the reviewer: after each label write `kept`, `edited` or `dropped`; after",
+           "`edited` or `dropped`, a dash and the reason. Then run `check_dispositions.py`",
+           "on this file. Your decisions show how far the draft could be used.", "",
+           "reviewer:", "date:", ""]
+    for lab, i in zip(form_labels(led["issues"]), led["issues"]):
+        out += [f"- {lab}: undecided", f"  {i['title']}"]
+    return "\n".join(out) + "\n"
+
+
+def read_dispositions(path):
+    """{label: {"decision", "reason", "title"}} plus the reviewer and date fields."""
+    lines = open(path, encoding="utf-8").read().split("\n")
+    out, meta = {}, {}
+    for k, line in enumerate(lines):
+        fm = re.match(r"^(reviewer|date)\s*:\s*(.*?)\s*$", line)
+        if fm:
+            meta[fm.group(1)] = fm.group(2)
+            continue
+        m = DISP_LINE.match(line)
+        if not m:
+            continue
+        nxt = lines[k + 1] if k + 1 < len(lines) else ""
+        title = nxt.strip() if nxt.startswith((" ", "\t")) and nxt.strip() else ""
+        out[f"{m.group(1)} {int(m.group(2))}"] = {"decision": m.group(3).lower(),
+                                                 "reason": (m.group(4) or "").strip(),
+                                                 "title": title}
+    return out, meta
+
+
 def form_labels(issues):
     """Each issue's label as the rendered form lists it ("Major 2", "Minor 1"): issues
     are numbered within their severity, in ledger order. One list, aligned with

@@ -70,8 +70,9 @@ The clinical modules `estimand`, `missing-data`, `time-to-event`, `multiplicity`
 `quarto-r-audit.md`, `r-traps.md`, `worked-cases.md`; the assignment, intake, agents and progress templates, the
 consistency matrix, arithmetic checks, SAP adherence, specification map, assumption
 ledger and questions templates, `recompute.R` and `inline_values.R`; `jobfiles.py`, `scan_job.py`,
-`new_job.py`; the whole `dkf-synthetic-data` skill; `issues.py` and
-`annotate_source.py`.
+`new_job.py` and the job `.gitignore` it writes (`assets/job-gitignore`); the whole
+`dkf-synthetic-data` skill; `issues.py`, `annotate_source.py` and
+`check_dispositions.py`.
 
 ## Not carried over
 

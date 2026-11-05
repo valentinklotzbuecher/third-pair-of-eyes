@@ -11,7 +11,7 @@ description: >-
   what the product establishes. Use when asked to review, check or consistency-review
   a statistical product, an SSE, a SAP or a statistical report.
 metadata:
-  version: "0.2.2"
+  version: "0.3.0"
   based-on: "research_skills `review` 0.9.1 (isitcredible/research_skills@766f28f)"
 ---
 
@@ -149,13 +149,38 @@ core modules and what is out of scope.
     finding. Typos matter only where they change a number, a definition or a reader's
     understanding.
 
+## Before the run
+
+These rules travel with the skill: they bind wherever it runs. The coordinating session
+applies them once, before any stage agent starts; stage agents never ask the user and
+write what they need under "Requests for the operator" in `00_INTAKE.md`.
+
+- **Where the job lives.** Beside the product, in the product's own repository
+  (`review/<yyyy-mm-dd>_<depth>/`), committed there under the `.gitignore` that
+  `new_job.py` writes: the review, its evidence and its outputs, never copies of the
+  product or its documents, literature or data. Never in the repository that holds
+  these skills. In data mode `shared`, activate that `.gitignore`'s shared-mode block
+  before intake (gate I2).
+- **Clearance first.** Run the clearance scan before opening any file in the job
+  (Intake, step 1). Never open, print or summarise a file the data mode does not
+  clear, not even to check whether it is real data.
+- **Confirm once.** Tell the user the depth and data mode the assignment sets, the size
+  class the scan prints and what the run needs (on a short SSE, depth `quick` took
+  about half an hour of model time and `standard` about one 5-hour usage window), and
+  wait for the go-ahead. Ask them to check their usage (`/usage`); suggest waiting or
+  `quick` when the weekly window is above about 70%. Never start a second review while
+  one runs on the same account.
+- **Billing.** Check whether `ANTHROPIC_API_KEY` is set without printing it
+  (`[ -n "${ANTHROPIC_API_KEY:-}" ] && echo set`); if it is, tell the user the run may
+  be billed to that key rather than their subscription (`/status` shows which).
+
 ## Intake
 
 The operator prepares the job folder (`python3 <dkf-review skill>/scripts/new_job.py
-<job>` creates it) and fills in `00_ASSIGNMENT.md` from `assets/ASSIGNMENT-template.md`:
-the product and its type, the questions for the reviewer, the documents it depends
-on, what has been cleared for sending to the model provider, the data mode and the
-depth.
+<job>` creates it, with its `.gitignore`) and fills in `00_ASSIGNMENT.md` from
+`assets/ASSIGNMENT-template.md`: the product and its type, the questions for the
+reviewer, the documents it depends on, what has been cleared for sending to the model
+provider, the data mode and the depth.
 
 1. **Clearance first.** Run `python3 <dkf-review skill>/scripts/scan_job.py --root
    <job>` before opening anything. It inventories the job (names, sizes, hashes; it
@@ -211,7 +236,10 @@ request in its report; the coordinator relays it.
 
 ```
 <job>/
-├── 00_ASSIGNMENT.md · 00_INTAKE.md · AGENTS.md · PROGRESS.md · packet folders (above)
+├── 00_ASSIGNMENT.md · 00_INTAKE.md · AGENTS.md · PROGRESS.md · .gitignore
+│                  packet folders (above)
+├── CONSISTENCY_REVIEW.md/.html/.org · ISSUES*.md · REVIEWER.md
+│                  DISPOSITIONS.md (all written by dkf-consistency-review)
 ├── review/        document-REPORT.md · code-and-data-REPORT.md · statements-REPORT.md ·
 │   │              challenge-REPORT.md · intake-scan.json
 │   └── extracts/  pdftotext dumps of the packet and of every quoted source
@@ -224,7 +252,7 @@ request in its report; the coordinator relays it.
 │   │                   assumption-ledger.csv (SSE) · module-walk.md · <module>-REPORT.md
 │   └── statements/     statement-ledger.csv · questions.csv · driver-matrix.csv
 ├── work/          pkg/ (working copy of 01_product) · synthetic/ · scripts/ · logs/ ·
-│                  results/ · challenge/
+│                  results/ · challenge/ · annotated/ · digest/ · followup/
 └── SYNTHESIS.md   the verdict stage's deliverable
 ```
 

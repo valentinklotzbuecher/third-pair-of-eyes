@@ -19,6 +19,7 @@ import sys
 
 SKILL = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TEMPLATE = os.path.join(SKILL, "assets", "ASSIGNMENT-template.md")
+GITIGNORE = os.path.join(SKILL, "assets", "job-gitignore")
 
 
 def copy_into(src, dest_dir):
@@ -63,6 +64,13 @@ def main(argv=None):
     else:
         shutil.copy2(TEMPLATE, assignment)
         done.append("00_ASSIGNMENT.md written from the template")
+    ignore = os.path.join(job, ".gitignore")
+    if os.path.exists(ignore):
+        done.append(".gitignore exists: left unchanged")
+    else:
+        shutil.copy2(GITIGNORE, ignore)
+        done.append(".gitignore written: copies of the product, literature and data stay out "
+                    "of any commit")
     print(f"Job folder: {job}")
     for line in done:
         print(f"  {line}")

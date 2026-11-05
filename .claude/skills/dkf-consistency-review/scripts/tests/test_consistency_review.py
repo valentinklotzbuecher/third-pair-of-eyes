@@ -6,6 +6,7 @@ import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.dirname(HERE))
 import annotate_source  # noqa: E402
+import check_dispositions  # noqa: E402
 import check_issue_coverage  # noqa: E402
 import issues as iss  # noqa: E402
 import render_review  # noqa: E402
@@ -398,3 +399,56 @@ def test_simple_md_bullet_continuation_stays_in_its_sentence():
                    "<li>Second limit.</li></ul>"
     nested = render_review.simple_md("1. Item text\n   - sub one\n   - sub two\n2. Next item\n")
     assert nested == "<ol><li>Item text<ul><li>sub one</li><li>sub two</li></ul></li><li>Next item</li></ol>"
+
+
+def test_evidence_appendix_links_only_committable_files(tmp_path):
+    srcs = ("SYNTHESIS.md; work/logs/a.log L12; 01_product/example.qmd; work/pkg/x.qmd; "
+            "work/pkg/variants/v1.diff; work/missing.log; 04_data/d.csv")
+    j = make(tmp_path, issues=ISSUES.replace("sources: SYNTHESIS.md", f"sources: {srcs}", 1))
+    for rel in ("work/logs/a.log", "work/pkg/x.qmd", "work/pkg/variants/v1.diff", "04_data/d.csv"):
+        write(f"{j}/{rel}", "x")
+    assert render_review.main([f"{j}/ISSUES.md", "--org"]) == 0
+    md = open(f"{j}/CONSISTENCY_REVIEW.md", encoding="utf-8").read()
+    ev = md.split("## Evidence behind each issue", 1)[1].split("---", 1)[0]
+    assert "[work/logs/a.log](work/logs/a.log)" in ev and "[SYNTHESIS.md](SYNTHESIS.md)" in ev
+    assert "work/pkg/variants/v1.diff" in ev
+    for never in ("01_product", "work/pkg/x.qmd", "work/missing.log", "04_data"):
+        assert never not in ev
+    assert '<a href="work/logs/a.log">' in open(f"{j}/CONSISTENCY_REVIEW.html", encoding="utf-8").read()
+    assert "[[file:work/logs/a.log][work/logs/a.log]]" in open(f"{j}/CONSISTENCY_REVIEW.org", encoding="utf-8").read()
+
+
+def test_render_writes_reviewer_note_and_dispositions_once(tmp_path):
+    j = make(tmp_path)
+    assert render_review.main([f"{j}/ISSUES.md"]) == 0
+    assert "DISPOSITIONS.md" in open(f"{j}/REVIEWER.md", encoding="utf-8").read()
+    led = iss.read_issues(f"{j}/ISSUES.md")
+    disp = open(f"{j}/DISPOSITIONS.md", encoding="utf-8").read()
+    for lab, i in zip(iss.form_labels(led["issues"]), led["issues"]):
+        assert f"- {lab}: undecided\n  {i['title']}" in disp
+    write(f"{j}/DISPOSITIONS.md", disp.replace("undecided", "kept"))
+    assert render_review.main([f"{j}/ISSUES.md"]) == 0
+    assert "undecided" not in open(f"{j}/DISPOSITIONS.md", encoding="utf-8").read()
+
+
+def test_check_dispositions(tmp_path, capsys):
+    j = make(tmp_path)
+    render_review.main([f"{j}/ISSUES.md"])
+    p = f"{j}/DISPOSITIONS.md"
+    template = open(p, encoding="utf-8").read()
+    assert check_dispositions.main([p]) == 1 and "still undecided" in capsys.readouterr().out
+    labels = iss.form_labels(iss.read_issues(f"{j}/ISSUES.md")["issues"])
+    filled = template
+    for lab, dec in zip(labels, ("kept", "edited — reworded the fix", "dropped — not a fault")):
+        filled = filled.replace(f"- {lab}: undecided", f"- {lab}: {dec}")
+    write(p, filled)
+    capsys.readouterr()
+    assert check_dispositions.main([p, "--json"]) == 0
+    summary = json.loads(capsys.readouterr().out.splitlines()[0])
+    assert (summary["kept"], summary["edited"], summary["dropped"], summary["complete"]) == (1, 1, 1, True)
+    write(p, filled.replace("edited — reworded the fix", "edited"))
+    assert check_dispositions.main([p]) == 1 and "needs a reason" in capsys.readouterr().out
+    write(p, filled.replace(f"- {labels[0]}: kept\n  ", f"- {labels[0]}: kept\n  Another title "))
+    assert check_dispositions.main([p]) == 1 and "the issues changed" in capsys.readouterr().out
+    write(p, filled + "- Major 9: kept\n")
+    assert check_dispositions.main([p]) == 1 and "Major 9 is not an issue" in capsys.readouterr().out

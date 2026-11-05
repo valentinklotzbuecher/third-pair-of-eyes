@@ -6,10 +6,14 @@ description: >-
   Minor issues, Answers to the issues listed in the assignment, and what the review
   could not check. Writes the issue ledger ISSUES.md, gates it for facts, coverage and
   register, renders CONSISTENCY_REVIEW.md/.html (and .org), and can write REVIEW
-  comments into a copy of the Quarto source. Use when asked for "the consistency
-  review", "the review form", "the reviewer's draft" or to "write up the review".
+  comments into a copy of the Quarto source, and hands the review to the human
+  reviewer with the evidence behind each issue and a file for their decisions. Use when
+  asked for "the consistency review", "the review form", "the reviewer's draft" or to
+  "write up the review"; also when the human reviewer works through a finished review
+  (explain an issue's evidence, re-run with changed inputs, record which issues they
+  keep).
 metadata:
-  version: "0.2.2"
+  version: "0.3.0"
   based-on: "research_skills `review-digest` 0.9.1 (isitcredible/research_skills@766f28f)"
 ---
 
@@ -117,9 +121,37 @@ skill's directory.
    `CONSISTENCY_REVIEW.html` and check that the Decision boxes follow from the issues,
    that every issue has a location and a fix, that the general comments carry the
    synthesis's bottom line, that every question is answered as asked, and that no
-   rendered sentence's subject is the review's own activity. Save the record as
+   rendered sentence's subject is the review's own activity. The evidence appendix
+   lists paths by design; it is the only place the form shows them. Save the record as
    `work/digest/verify-pass.md`, ending with its `gate:` line. A different bottom line
    is an `ERRATA.md` item for the verdict stage, never a reorder.
+
+8. **Hand off.** The render writes `REVIEWER.md` (where the reviewer starts),
+   `DISPOSITIONS.md` once (one line per issue for the reviewer's decision; never
+   overwritten), and ends the form with "Evidence behind each issue": per issue, links
+   to the files in its `sources:` that exist in the job and are committed with it, never
+   a copy of the product, its documents, literature or data. Tell the operator where
+   the job folder is; in the product's repository it is committed there (`dkf-review`,
+   Before the run).
+
+## Working with the reviewer
+
+When the human reviewer works through a finished review in its job folder:
+
+- **The run's rules still bind.** Run the clearance scan before opening anything; the
+  data mode and its disclosure rules hold as they did for the run.
+- **Answer from the evidence.** Each answer cites the job's files it rests on (report,
+  ledger, script and log, printed page). A question the evidence does not settle is
+  said to be open, not answered from memory.
+- **Re-run in a copy.** A variant the reviewer asks for (another correlation, a
+  two-sided test) runs from a copy under `work/followup/<yyyy-mm-dd>_<topic>/`, with its
+  script and log; the run's own files stay as they are.
+- **The form is the reviewer's.** Change `ISSUES.md`, the form or `SYNTHESIS.md` only
+  when the reviewer asks; then re-run the gates and re-render. Record a decision in
+  `DISPOSITIONS.md` only as the reviewer states it, and run
+  `scripts/check_dispositions.py DISPOSITIONS.md` when they are done.
+- **Keep a short log** in `work/followup/LOG.md`: each question, the evidence of its
+  answer, and any change made.
 
 ## Severity
 

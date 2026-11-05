@@ -7,39 +7,13 @@ the user guide. The earlier API prototype is in `archive/` and is not maintained
 ## Running a review
 
 - Use the `dkf-review` skill, then `dkf-consistency-review` (and `dkf-review-audit`
-  first at depth `full`). Jobs live in `jobs/<job>/`, which git ignores: never commit
-  or copy job contents elsewhere. The one exception is a synthetic demonstration
+  first at depth `full`). The `dkf-review` skill's "Before the run" rules (where the
+  job lives, clearance, confirmation, usage, billing) bind here too.
+- Real reviews live in the product's own repository, never here. This repository's
+  `jobs/` holds trial and demo jobs only and stays git-ignored: never commit a job here
+  or copy its contents elsewhere. The one exception is a synthetic demonstration
   product the user names (such as DEMO-TKA from `scto-ai-review`): its review outputs
   may be copied where the user asks.
-- **Before starting any review, confirm with the user**, a synthetic product
-  included: a review runs many agent turns, and a `standard` review of a short SSE
-  needs about one 5-hour usage window of active work. Say which depth and data mode
-  the assignment sets and the product's size class from the clearance scan, and ask
-  the user to check their usage (`/usage`): suggest waiting or depth `quick` when the
-  weekly window is above about 70%, and never start a second review while one runs on
-  the same account. This is the coordinating session's job, done once before any stage agent is
-  dispatched; stage agents do not ask, and write anything they need from the user
-  under "Requests for the operator" in the job's `00_INTAKE.md`.
-- **Billing.** Reviews are meant to run on the Claude subscription Claude Code is
-  logged in with. When confirming, check whether `ANTHROPIC_API_KEY` is set without
-  printing it (`[ -n "${ANTHROPIC_API_KEY:-}" ] && echo set`); if it is, tell the user
-  the run may be billed to that key instead, and that `/status` shows which.
-- **Clearance first, every time.** Run
-  `python3 .claude/skills/dkf-review/scripts/scan_job.py --root jobs/<job>` before
-  opening any file in a job. On a non-zero exit, stop and tell the user what the scan
-  reported. Never open, print or summarise a file the assignment's data mode does not
-  clear, not even "to check whether it is real data". Never read patient-level data
-  unless the data mode is `shared` with a recorded clearance.
-- Web searches use general terms only (condition, intervention, endpoint), never
-  internal IDs, unpublished results or data.
-- Long computations (simulations) run in the background with start and end markers
-  in their logs; record them in the job's `PROGRESS.md`.
-- Dispatch fired module agents one at a time, each finishing its report before the
-  next starts, unless the user asks for parallel runs: in the trial, four parallel
-  module agents used up a subscription session's allowance, and one at a time a usage
-  limit stops at most one part-way.
-- When the user asks to continue a job, resume from its `PROGRESS.md` under the
-  `dkf-review` progress-file rules.
 
 ## Developing the skills
 

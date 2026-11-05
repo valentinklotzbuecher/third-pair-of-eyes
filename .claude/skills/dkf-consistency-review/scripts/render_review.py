@@ -50,7 +50,7 @@ def indent(text, n=3):
     return "\n".join((" " * n + ln) if ln.strip() else "" for ln in text.split("\n"))
 
 
-def build_markdown(led, final, problems):
+def build_markdown(led, final, problems, root=None):
     meta, secs = led["meta"], led["sections"]
     product = meta.get("product") or meta.get("statistical-product") or "statistical product"
     out = [f"# Consistency review: {product}", ""]
@@ -99,6 +99,15 @@ def build_markdown(led, final, problems):
     nc = secs.get("not checked", "").strip()
     if nc:
         out += ["### What this review could not check", "", nc, ""]
+    ev = [(lab, iss.evidence(root, i)) for lab, i in zip(iss.form_labels(led["issues"]),
+                                                         led["issues"])] if root else []
+    if any(files for _, files in ev):
+        out += ["## Evidence behind each issue", "",
+                "The scripts, logs and tables each issue rests on, relative to this folder.", ""]
+        for lab, files in ev:
+            if files:
+                out.append(f"- **{lab}.** " + " · ".join(f"[{f}]({f})" for f in files))
+        out.append("")
     out += ["---", "",
             f"<!-- dkf-consistency-review build: ledger={os.path.basename(led['path'])} "
             f"sha256={led['sha256']} final={'yes' if final else 'no'} "
@@ -323,7 +332,7 @@ def org_inline(s):
     return re.sub(r"`([^`]+)`", r"~\1~", s)
 
 
-def build_org(led):
+def build_org(led, root=None):
     """The DKF template's org layout: *** CONSISTENCY REVIEW, **** Assignment, …"""
     secs = led["sections"]
     out = ["*** CONSISTENCY REVIEW", "**** Assignment"]
@@ -349,7 +358,38 @@ def build_org(led):
     nc = secs.get("not checked", "").strip()
     if nc:
         out += ["***** Not checked by the AI review"] + [org_inline(ln) for ln in nc.split("\n")]
+    if root:
+        ev = [(lab, iss.evidence(root, i)) for lab, i in zip(iss.form_labels(led["issues"]),
+                                                             led["issues"])]
+        if any(files for _, files in ev):
+            out.append("***** Evidence behind each issue")
+            for lab, files in ev:
+                if files:
+                    out.append(f"- {lab}: " + " · ".join(f"[[file:{f}][{f}]]" for f in files))
     return "\n".join(out) + "\n"
+
+
+REVIEWER_NOTE = """\
+# For the reviewer
+
+This folder holds a draft of the consistency review of {product}, prepared by an AI agent
+with the DKF review skills (v{version}, depth {depth}; {status}). It prepares your review
+and does not replace it: you decide what goes into the form, and you sign it.
+
+- **Read** `CONSISTENCY_REVIEW.html` (or `.md`). Edit the form in `CONSISTENCY_REVIEW.org`,
+  or copy what you keep into the DKF template.
+- **In the source**, `work/annotated/` holds a copy of the `.qmd` with a `REVIEW` comment
+  at each line an issue concerns; the comments carry the form's labels (Major 1, Minor 2).
+- **Check a claim** through the links under "Evidence behind each issue" at the end of
+  the form: the scripts, logs and tables behind each number.
+- **Record your decision** on every issue in `DISPOSITIONS.md` (kept, edited or dropped,
+  with a reason), then run
+  `python3 <dkf-consistency-review skill>/scripts/check_dispositions.py DISPOSITIONS.md`.
+- **Ask questions** by opening Claude Code in this folder with the DKF review skills
+  available: "Walk me through Major 1", "Re-run the sample size with a correlation of
+  0.6". It answers from the evidence, re-runs in `work/followup/`, records the decisions
+  you state, and changes the form only when you ask.
+"""
 
 
 def finalize_problems(led, root):
@@ -398,7 +438,7 @@ def main(argv=None):
         print("FINALIZE REFUSED: nothing written.")
         return 1
     final = a.finalize and not problems
-    md = build_markdown(led, final, problems)
+    md = build_markdown(led, final, problems, root)
     stem = os.path.join(root, a.out_stem)
     with open(stem + ".md", "w", encoding="utf-8") as fh:
         fh.write(md)
@@ -408,8 +448,21 @@ def main(argv=None):
     written = [stem + ".md", stem + ".html"]
     if a.org:
         with open(stem + ".org", "w", encoding="utf-8") as fh:
-            fh.write(build_org(led))
+            fh.write(build_org(led, root))
         written.append(stem + ".org")
+    disp = os.path.join(root, "DISPOSITIONS.md")
+    if os.path.exists(disp):
+        print("DISPOSITIONS.md exists: left unchanged (the reviewer's decisions)")
+    else:
+        with open(disp, "w", encoding="utf-8") as fh:
+            fh.write(iss.dispositions_template(led))
+        written.append(disp)
+    with open(os.path.join(root, "REVIEWER.md"), "w", encoding="utf-8") as fh:
+        fh.write(REVIEWER_NOTE.format(
+            product=led["meta"].get("product") or "the statistical product",
+            version=suite_version(), depth=led["meta"].get("depth", "standard"),
+            status="final" if final else "a preview, not final"))
+    written.append(os.path.join(root, "REVIEWER.md"))
     boxes = iss.decision(led["issues"], led["answers"])
     print("Decision: " + "; ".join(("[x] " if t else "[ ] ") + l.split(" (")[0] for t, l in boxes))
     for w in written:
