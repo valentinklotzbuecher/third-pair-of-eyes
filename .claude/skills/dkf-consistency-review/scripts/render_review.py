@@ -145,6 +145,21 @@ def simple_md(md):
             j += 1
         return j
 
+    def ends_paragraph(ln, base=None):
+        """Whether `ln` ends a running paragraph (CommonMark): a heading, quote or rule;
+        an item of the enclosing list (indent at most `base`); or a list that may
+        interrupt a paragraph: a bullet, or an ordered list starting at 1. A wrapped
+        line such as "147) leaves ..." is continuation text, not a list."""
+        if re.match(r"^\s*(#{1,6}\s|>|-{3,}\s*$)", ln):
+            return True
+        m = ITEM.match(ln)
+        if m is None:
+            return False
+        if base is not None and len(m.group(1)) <= base:
+            return True
+        mark = m.group(2)
+        return not mark[0].isdigit() or mark[:-1] == "1"
+
     def list_block(i, base):
         first = ITEM.match(lines[i])
         ordered = first.group(2)[0].isdigit()
@@ -177,14 +192,19 @@ def simple_md(md):
                 continue
             if m.group(2)[0].isdigit() != ordered:
                 break
-            item = m.group(3)
+            first = [m.group(3)]
+            i += 1
+            # the item's first paragraph continues on the following lines
+            while i < len(lines) and lines[i].strip() and not ends_paragraph(lines[i], base):
+                first.append(lines[i].strip())
+                i += 1
+            item = " ".join(first)
             box = re.match(r"^\[([ xX])\]\s+(.*)$", item)
             if box:
                 item = ("&#9746; " if box.group(1).lower() == "x" else "&#9744; ") + inline(box.group(2))
                 cls = ' class="task"'
             else:
                 item, cls = inline(item), ""
-            i += 1
             paras, cur = [], []
             while i < len(lines):
                 ln = lines[i]
@@ -198,9 +218,13 @@ def simple_md(md):
                         i = j
                         continue
                     break
+                if cur and not ends_paragraph(ln, base):
+                    cur.append(ln.strip())
+                    i += 1
+                    continue
                 if ITEM.match(ln):
                     break
-                if len(ln) - len(ln.lstrip()) >= base + 2 or cur:
+                if len(ln) - len(ln.lstrip()) >= base + 2:
                     cur.append(ln.strip())
                     i += 1
                     continue
@@ -254,8 +278,9 @@ def simple_md(md):
             block, i = list_block(i, len(ln) - len(ln.lstrip()))
             out.append(block)
             continue
-        buf = []
-        while i < len(lines) and lines[i].strip() and not re.match(r"^(#{1,6}\s|>|\s*(?:[-*+]|\d+[.)])\s|-{3,}\s*$)", lines[i]):
+        buf = [ln.strip()]
+        i += 1
+        while i < len(lines) and lines[i].strip() and not ends_paragraph(lines[i]):
             buf.append(lines[i].strip())
             i += 1
         out.append(f"<p>{inline(' '.join(buf))}</p>")

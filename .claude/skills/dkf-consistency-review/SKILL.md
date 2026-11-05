@@ -9,7 +9,7 @@ description: >-
   comments into a copy of the Quarto source. Use when asked for "the consistency
   review", "the review form", "the reviewer's draft" or to "write up the review".
 metadata:
-  version: "0.2.0"
+  version: "0.2.1"
   based-on: "research_skills `review-digest` 0.9.1 (isitcredible/research_skills@766f28f)"
 ---
 

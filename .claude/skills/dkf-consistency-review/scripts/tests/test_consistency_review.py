@@ -378,3 +378,23 @@ def test_form_length_limit_for_a_short_product(tmp_path, capsys):
         fh.write(text)
     assert check_issue_coverage.main([f"{j}/ISSUES.md"]) == 1
     assert "the form for a short product" in capsys.readouterr().out
+
+
+def test_simple_md_wrapped_number_is_not_a_list():
+    # a body line that wraps to begin with "147)" continues the paragraph (only a list
+    # starting at 1 may interrupt one), so the reference is kept and no list starts
+    page = render_review.simple_md("1. **Dropout** (p. 2)\n\n   Randomising 66 per group (qmd:76,\n"
+                                   "   147) leaves 52.8 evaluable.\n\n   Fix: divide by 0.8.\n")
+    assert "(qmd:76, 147) leaves 52.8 evaluable." in page
+    assert 'start="147"' not in page and page.count("<ol") == 1
+    top = render_review.simple_md("Text that ends (see\n12) for detail.\n\n1. a list\n")
+    assert "<p>Text that ends (see 12) for detail.</p>" in top and "<ol><li>a list</li></ol>" in top
+
+
+def test_simple_md_bullet_continuation_stays_in_its_sentence():
+    page = render_review.simple_md("- The cited sources were not\n  provided, so they were not checked.\n"
+                                   "- Second limit.\n")
+    assert page == "<ul><li>The cited sources were not provided, so they were not checked.</li>" \
+                   "<li>Second limit.</li></ul>"
+    nested = render_review.simple_md("1. Item text\n   - sub one\n   - sub two\n2. Next item\n")
+    assert nested == "<ol><li>Item text<ul><li>sub one</li><li>sub two</li></ul></li><li>Next item</li></ol>"
