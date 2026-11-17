@@ -18,16 +18,18 @@ for what was kept, adapted and replaced. The earlier single-call API prototype i
 The review is an aid to the human consistency review, not a replacement. It says what
 it checked, on what evidence, and what it could not check.
 
-**Status: version 0.2.0.** Two complete runs on a synthetic demonstration SSE with six
+**Status: version 0.3.0.** Three runs on a synthetic demonstration SSE with six
 planted issues (DEMO-TKA, two pages; kept outside this repository so no run can read
-its answer key) found all six, at depth `standard` with and without the clinical
-modules, and sized each one; one run also caught an error in the answer key. They
-also showed the cost: about 3.4 and 1.6 hours of model time, $72 and $27 at API list
-prices, and texts several times the length of the product. Version 0.2.0 answers that
-with a two-agent `quick` depth, modules worked through in the stage agent for short
-products, length limits that follow the product's size, and a thin coordinator; it
-has not yet been re-run on the demo. A trial on one real SSE ran the first two
-stages. The data modes `synthetic` and `shared` have not yet run on a real product.
+its answer key) found all six and sized each one; one run also caught an error in the
+answer key. The two at depth `standard` (version 0.1) took about 3.4 and 1.6 hours of
+model time, $72 and $27 at API list prices, and wrote texts several times the length
+of the product. Version 0.2 added the two-agent `quick` depth and length limits that
+follow the product's size: its run took 34 minutes from start to finished form, $10
+at API list prices, with a form of about 1,100 words. Version 0.3 hands the review to
+the human reviewer (`REVIEWER.md`, `DISPOSITIONS.md`) and keeps each review with its
+product; it has not yet been run on the demo. A trial on one real SSE ran the first
+two stages. The data modes `synthetic` and `shared` have not yet run on a real
+product.
 
 ## The skills
 
@@ -66,9 +68,28 @@ A review lives with the product: its job folder sits in the product's own reposi
 and is committed there. This repository only provides the skills and stays free of
 reviews (its `jobs/` folder is for trials and the synthetic demo, and is git-ignored).
 
-1. **Make the skills available.** In a Claude Code session on the web, select both the
-   product's repository and this one. Locally, link the four skill folders into your
-   user skills once:
+1. **Make the skills available.** Either on the web or locally.
+
+   *Claude Code on the web* (claude.ai/code), for a product in a private GitHub
+   repository. Once:
+   - Connect GitHub at claude.ai/connect-github. The Claude GitHub App must be
+     installed on the product's repository; this one is reached through your access
+     as a collaborator.
+   - In a cloud environment (the environment menu in the session's title bar, then
+     Edit), paste [`tools/web_setup.sh`](tools/web_setup.sh) under Setup script. It
+     installs R with knitr and rmarkdown, Quarto, Poppler and mistune, which the cloud
+     image lacks; add the product's R packages there as `r-cran-*` lines.
+   - Network access must allow package managers and github.com. A literature search
+     needs wider access; without it the review records the check as waived.
+   - Set no `ANTHROPIC_API_KEY` among the environment's variables (see "Running on a
+     Claude subscription").
+
+   For each review, start a session in that environment with both the product's
+   repository and this one selected. The session works on its own branch of the
+   product's repository: merge the job folder there (step 5). Each session clones this
+   repository fresh, so it always runs the current skills.
+
+   *Locally*, link the four skill folders into your user skills once:
 
    ```bash
    mkdir -p ~/.claude/skills
@@ -85,8 +106,11 @@ reviews (its `jobs/` folder is for trials and the synthetic demo, and is git-ign
      --product SSE001.qmd SSE001.pdf --governing ../protocol/protocol_v1.2.pdf
    ```
 
-   A product whose source reads other files (saved simulation results, a
-   `_quarto.yml`) is given as its folder: `--product path/to/product_folder/`. The job
+   On the web the script sits in this repository's clone
+   (`../stats_review/.claude/skills/dkf-review/scripts/new_job.py` from the product's
+   clone), or ask Claude to create the job. A product whose source reads other files
+   (saved simulation results, a `_quarto.yml`) is given as its folder:
+   `--product path/to/product_folder/`. The job
    gets its own `.gitignore`, which keeps copies of the product and its documents,
    literature and any data out of every commit.
 3. **Fill in `00_ASSIGNMENT.md`**: product type, the questions for the reviewer, the
@@ -95,7 +119,8 @@ reviews (its `jobs/` folder is for trials and the synthetic demo, and is git-ign
    then write the consistency review."* It runs the clearance scan, states the depth,
    data mode and size class, asks you to check your usage, and waits for your go-ahead.
    A run that stops part-way resumes from the job's `PROGRESS.md`.
-5. **Commit the job folder** in the product's repository.
+5. **Commit the job folder** in the product's repository (on the web: merge the
+   session's branch there).
 6. **The human reviewer** starts from the job's `REVIEWER.md`: the form
    (`CONSISTENCY_REVIEW.html`, editable as `.org`), the source with `REVIEW` comments
    (`work/annotated/`), links from each issue to the scripts and logs behind it, and
@@ -133,6 +158,16 @@ Claude Code is logged in with the subscription:
   commercial plans (Team, Enterprise, Education) and the API are not covered by it.
   Check the setting and the DKF rules before clearing any document.
 
+## Using these skills as a colleague
+
+- Run reviews from your product's repository, as above. Don't push to this repository
+  or keep reviews here.
+- Report a problem, or something a review got wrong, as a GitHub issue in general
+  terms: what kind of product, what the review did, what it should have done. Leave
+  out the product's name, numbers and text; they stay in the job.
+- Start with depth `quick` and data mode `none` on a product that already had its
+  human review, and compare the two.
+
 ## Requirements
 
 - Claude Code, or another agent harness that can start fresh subagents (the challenge
@@ -152,6 +187,7 @@ Claude Code is logged in with the subscription:
 .claude/skills/        the four skills, LICENSE-research_skills, UPSTREAM.md
 jobs/                  trial and demo jobs only (git-ignored)
 tools/upstream_diff.sh what changed upstream since the fork
+tools/web_setup.sh     setup script for a Claude Code on the web environment
 archive/               the earlier API prototype
 CLAUDE.md              instructions for Claude Code in this repository
 AGENTS.md              pointer to CLAUDE.md for other coding agents
