@@ -11,7 +11,7 @@ description: >-
   what the product establishes. Use when asked to review, check or consistency-review
   a statistical product, an SSE, a SAP or a statistical report.
 metadata:
-  version: "0.3.0"
+  version: "0.3.1"
   based-on: "research_skills `review` 0.9.1 (isitcredible/research_skills@766f28f)"
 ---
 

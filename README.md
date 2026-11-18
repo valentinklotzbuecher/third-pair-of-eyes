@@ -18,7 +18,7 @@ for what was kept, adapted and replaced. The earlier single-call API prototype i
 The review is an aid to the human consistency review, not a replacement. It says what
 it checked, on what evidence, and what it could not check.
 
-**Status: version 0.3.0.** Three runs on a synthetic demonstration SSE with six
+**Status: version 0.3.1.** Three runs on a synthetic demonstration SSE with six
 planted issues (DEMO-TKA, two pages; kept outside this repository so no run can read
 its answer key) found all six and sized each one; one run also caught an error in the
 answer key. The two at depth `standard` (version 0.1) took about 3.4 and 1.6 hours of
