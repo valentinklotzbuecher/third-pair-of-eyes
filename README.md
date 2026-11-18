@@ -158,6 +158,14 @@ Claude Code is logged in with the subscription:
   commercial plans (Team, Enterprise, Education) and the API are not covered by it.
   Check the setting and the DKF rules before clearing any document.
 
+## Trying the first stage in chat
+
+`chat-skills/dkf-document-check.zip` is the document stage on its own, for Claude
+chat: upload it under Customize, Skills (code execution on), attach a product you may
+send and ask for a document check. It shows what the agents are told to do and returns
+findings, a consistency table and a check log, but it runs no product code; see
+[`chat-skills/README.md`](chat-skills/README.md).
+
 ## Using these skills as a colleague
 
 - Run reviews from your product's repository, as above. Don't push to this repository
@@ -185,6 +193,7 @@ Claude Code is logged in with the subscription:
 
 ```
 .claude/skills/        the four skills, LICENSE-research_skills, UPSTREAM.md
+chat-skills/           stand-alone skills for Claude chat, outside the suite
 jobs/                  trial and demo jobs only (git-ignored)
 tools/upstream_diff.sh what changed upstream since the fork
 tools/web_setup.sh     setup script for a Claude Code on the web environment
@@ -199,7 +208,7 @@ AGENTS.md              pointer to CLAUDE.md for other coding agents
 cd .claude/skills
 python3 -m pytest -q -p no:cacheprovider dkf-review/scripts/tests dkf-review-audit/scripts/tests \
   dkf-consistency-review/scripts/tests dkf-consistency-review/ai-sweep/scripts/tests \
-  dkf-synthetic-data/scripts/tests
+  dkf-synthetic-data/scripts/tests ../../chat-skills/tests
 python3 dkf-review/scripts/check_suite_version.py
 ```
 

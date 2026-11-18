@@ -74,6 +74,13 @@ ledger and questions templates, `recompute.R` and `inline_values.R`; `jobfiles.p
 `dkf-synthetic-data` skill; `issues.py`, `annotate_source.py` and
 `check_dispositions.py`.
 
+## Outside this folder
+
+`../../chat-skills/dkf-document-check/` condenses `dkf-review/document/SKILL.md`
+(adapted from upstream `review/paper/SKILL.md`) for Claude chat, with a Python port of
+the document stage's helpers in `recompute.R` and unchanged copies of three references
+(new here); it carries `LICENSE-research_skills`.
+
 ## Not carried over
 
 The econometric modules (IV, difference-in-differences, RDD, shift-share, synthetic

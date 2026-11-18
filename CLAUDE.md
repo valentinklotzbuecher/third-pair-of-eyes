@@ -24,9 +24,16 @@ the user guide. The earlier API prototype is in `archive/` and is not maintained
   `python3 .claude/skills/dkf-review/scripts/check_suite_version.py`; tag a settled
   version as `skills-vX.Y.Z`.
 - Run the tests before committing (from `.claude/skills/`):
-  `python3 -m pytest -q -p no:cacheprovider dkf-review/scripts/tests dkf-review-audit/scripts/tests dkf-consistency-review/scripts/tests dkf-consistency-review/ai-sweep/scripts/tests dkf-synthetic-data/scripts/tests`
+  `python3 -m pytest -q -p no:cacheprovider dkf-review/scripts/tests dkf-review-audit/scripts/tests dkf-consistency-review/scripts/tests dkf-consistency-review/ai-sweep/scripts/tests dkf-synthetic-data/scripts/tests ../../chat-skills/tests`
 - Gate scripts use the Python standard library only; recomputation and synthetic-data
   helpers are R (base R and `stats`), each with a test script.
+- `chat-skills/` holds stand-alone skills for Claude chat, outside the suite and its
+  version: each carries its own `metadata.version` and names the suite version it
+  follows in `metadata.based-on`. Their helpers use the Python standard library only (a
+  chat's sandbox may have no R); copies of suite files stay identical. A change to what
+  the document stage requires is ported to `dkf-document-check`. After any change run
+  `python3 chat-skills/build_zip.py`; the tests check the ZIP, the copies and the port
+  of `recompute.R`.
 - Keep `.claude/skills/UPSTREAM.md` current: which files are verbatim upstream copies,
   which are adapted, which are new. `tools/upstream_diff.sh <research_skills clone>`
   lists upstream changes since the recorded commit; port what applies and update the
