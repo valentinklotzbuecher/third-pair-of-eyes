@@ -25,11 +25,11 @@ Unchanged files; update them by copying the upstream version.
 | Here | Upstream |
 |---|---|
 | `LICENSE-research_skills` | `LICENSE` |
-| `dkf-consistency-review/ai-sweep/` (whole folder) | `review-digest/ai-sweep/` |
-| `dkf-consistency-review/scripts/build_manifest.py`, `corpus_rules.py`, `style-questions.json` | `review-digest/scripts/` |
-| `dkf-consistency-review/scripts/tests/conftest.py`, `test_build_manifest.py`, `test_check_facts.py`, `test_check_style.py` | `review-digest/scripts/tests/` |
-| `dkf-review/references/anomaly-tests.md` | `review/references/anomaly-tests.md` |
-| `dkf-review/references/methods/*.md` (16 cribs; list in its `README.md`) | `review/references/methods/` |
+| `stats-consistency-review/ai-sweep/` (whole folder) | `review-digest/ai-sweep/` |
+| `stats-consistency-review/scripts/build_manifest.py`, `corpus_rules.py`, `style-questions.json` | `review-digest/scripts/` |
+| `stats-consistency-review/scripts/tests/conftest.py`, `test_build_manifest.py`, `test_check_facts.py`, `test_check_style.py` | `review-digest/scripts/tests/` |
+| `stats-review/references/anomaly-tests.md` | `review/references/anomaly-tests.md` |
+| `stats-review/references/methods/*.md` (16 cribs; list in its `README.md`) | `review/references/methods/` |
 
 ## Adapted files
 
@@ -38,29 +38,29 @@ changes.
 
 | Here | Upstream source |
 |---|---|
-| `dkf-review/SKILL.md` | `review/SKILL.md` |
-| `dkf-review/document/SKILL.md` | `review/paper/SKILL.md` |
-| `dkf-review/code-and-data/SKILL.md` | `review/code-and-data/SKILL.md` |
-| `dkf-review/statements/SKILL.md` | `review/claims/SKILL.md` |
-| `dkf-review/challenge/SKILL.md` | `review/challenge/SKILL.md` |
-| `dkf-review/verdict/SKILL.md` | `review/verdict/SKILL.md` |
-| `dkf-review/modules/rct-diagnostics/` | `review/modules/experiment-diagnostics/` |
-| `dkf-review/modules/small-n-diagnostics/` | `review/modules/small-n-diagnostics/` |
-| `dkf-review/modules/sample-size-diagnostics/` (warrant grades) | `review/modules/whimsical-assumptions-diagnostics/` |
-| `dkf-review/modules/simulation-diagnostics/` | `review/modules/quantitative-model-diagnostics/`, `review/references/simulation-harness.md` |
-| `dkf-review/modules/observational-diagnostics/` (adjustment sets) | `review/modules/controls-samples-diagnostics/` |
-| `dkf-review/references/simulation-harness.md`, `construction-validity.md`, `source-protocol.md`, `literature-protocol.md` | same names in `review/references/` |
-| `dkf-review/references/statement-test-matrix.md` | `review/references/claim-test-matrix.md` |
-| `dkf-review/assets/report-template.md` and the ledger CSV templates | `review/assets/` |
-| `dkf-review/scripts/check_job.py` | `review/scripts/check_manifest.py` (concept) |
-| `dkf-review/scripts/check_suite_version.py` and its test | `review/scripts/check_suite_version.py` |
-| `dkf-review/spec-changes.csv` (format; rows restart at R001) | `review/spec-changes.csv` |
-| `dkf-review-audit/SKILL.md`, `references/audit-cases.md` | `audit-review/` |
-| `dkf-review-audit/scripts/check_spec_drift.py` and its test | `audit-review/scripts/check_spec_drift.py` |
-| `dkf-review-audit/scripts/check_coverage.py` | `audit-review/scripts/check_coverage.py` (concept) |
-| `dkf-consistency-review/SKILL.md` | `review-digest/SKILL.md` |
-| `dkf-consistency-review/scripts/check_facts.py`, `check_style.py` | `review-digest/scripts/` (DKF fields; failures-only rule limited to the issue list) |
-| `dkf-consistency-review/scripts/check_issue_coverage.py`, `render_review.py` | `review-digest/scripts/check_ledger_coverage.py`, `render_digest.py` (concepts) |
+| `stats-review/SKILL.md` | `review/SKILL.md` |
+| `stats-review/document/SKILL.md` | `review/paper/SKILL.md` |
+| `stats-review/code-and-data/SKILL.md` | `review/code-and-data/SKILL.md` |
+| `stats-review/statements/SKILL.md` | `review/claims/SKILL.md` |
+| `stats-review/challenge/SKILL.md` | `review/challenge/SKILL.md` |
+| `stats-review/verdict/SKILL.md` | `review/verdict/SKILL.md` |
+| `stats-review/modules/rct-diagnostics/` | `review/modules/experiment-diagnostics/` |
+| `stats-review/modules/small-n-diagnostics/` | `review/modules/small-n-diagnostics/` |
+| `stats-review/modules/sample-size-diagnostics/` (warrant grades) | `review/modules/whimsical-assumptions-diagnostics/` |
+| `stats-review/modules/simulation-diagnostics/` | `review/modules/quantitative-model-diagnostics/`, `review/references/simulation-harness.md` |
+| `stats-review/modules/observational-diagnostics/` (adjustment sets) | `review/modules/controls-samples-diagnostics/` |
+| `stats-review/references/simulation-harness.md`, `construction-validity.md`, `source-protocol.md`, `literature-protocol.md` | same names in `review/references/` |
+| `stats-review/references/statement-test-matrix.md` | `review/references/claim-test-matrix.md` |
+| `stats-review/assets/report-template.md` and the ledger CSV templates | `review/assets/` |
+| `stats-review/scripts/check_job.py` | `review/scripts/check_manifest.py` (concept) |
+| `stats-review/scripts/check_suite_version.py` and its test | `review/scripts/check_suite_version.py` |
+| `stats-review/spec-changes.csv` (format; rows restart at R001) | `review/spec-changes.csv` |
+| `stats-review-audit/SKILL.md`, `references/audit-cases.md` | `audit-review/` |
+| `stats-review-audit/scripts/check_spec_drift.py` and its test | `audit-review/scripts/check_spec_drift.py` |
+| `stats-review-audit/scripts/check_coverage.py` | `audit-review/scripts/check_coverage.py` (concept) |
+| `stats-consistency-review/SKILL.md` | `review-digest/SKILL.md` |
+| `stats-consistency-review/scripts/check_facts.py`, `check_style.py` | `review-digest/scripts/` (DKF fields; failures-only rule limited to the issue list) |
+| `stats-consistency-review/scripts/check_issue_coverage.py`, `render_review.py` | `review-digest/scripts/check_ledger_coverage.py`, `render_digest.py` (concepts) |
 
 ## New here
 
@@ -71,12 +71,12 @@ The clinical modules `estimand`, `missing-data`, `time-to-event`, `multiplicity`
 consistency matrix, arithmetic checks, SAP adherence, specification map, assumption
 ledger and questions templates, `recompute.R` and `inline_values.R`; `jobfiles.py`, `scan_job.py`,
 `new_job.py` and the job `.gitignore` it writes (`assets/job-gitignore`); the whole
-`dkf-synthetic-data` skill; `issues.py`, `annotate_source.py` and
+`stats-synthetic-data` skill; `issues.py`, `annotate_source.py` and
 `check_dispositions.py`.
 
 ## Outside this folder
 
-`../../chat-skills/dkf-document-check/` condenses `dkf-review/document/SKILL.md`
+`../../chat-skills/stats-document-check/` condenses `stats-review/document/SKILL.md`
 (adapted from upstream `review/paper/SKILL.md`) for Claude chat, with a Python port of
 the document stage's helpers in `recompute.R` and unchanged copies of three references
 (new here); it carries `LICENSE-research_skills`.
@@ -98,5 +98,5 @@ suite is installed beside this one.
 `../../tools/upstream_diff.sh <path to a research_skills clone>` lists what changed
 upstream since the commit above in the files this suite derives from, with the
 upstream changelog. Port what applies, bump the suite version in all four
-`SKILL.md` files, add rows to `dkf-review/spec-changes.csv` for changed requirements,
+`SKILL.md` files, add rows to `stats-review/spec-changes.csv` for changed requirements,
 and update the commit recorded here.

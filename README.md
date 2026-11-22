@@ -18,7 +18,7 @@ for what was kept, adapted and replaced. The earlier single-call API prototype i
 The review is an aid to the human consistency review, not a replacement. It says what
 it checked, on what evidence, and what it could not check.
 
-**Status: version 0.3.1.** Three runs on a synthetic demonstration SSE with six
+**Status: version 0.4.0.** Three runs on a synthetic demonstration SSE with six
 planted issues (DEMO-TKA, two pages; kept outside this repository so no run can read
 its answer key) found all six and sized each one; one run also caught an error in the
 answer key. The two at depth `standard` (version 0.1) took about 3.4 and 1.6 hours of
@@ -31,14 +31,20 @@ product; it has not yet been run on the demo. A trial on one real SSE ran the fi
 two stages. The data modes `synthetic` and `shared` have not yet run on a real
 product.
 
+Version 0.4 renames the skills so they read well outside DKF: `stats-review`,
+`stats-review-audit`, `stats-consistency-review`, `stats-synthetic-data` and the chat
+skill `stats-document-check` (they were `dkf-review` and so on); what they do is
+unchanged. A job made with an earlier version names the old folders; read `dkf-<name>`
+as `stats-<name>`.
+
 ## The skills
 
 | Skill | What it does |
 |---|---|
-| [`dkf-review`](.claude/skills/dkf-review/SKILL.md) | The review, in five stages: **document** (versions, consistency with protocol/SAP/registry, printed numbers and their arithmetic, design and estimand), **code-and-data** (code against text, Quarto/R mechanics, runs under the job's data mode, assumption and fragility checks, twelve clinical diagnostic modules), **statements** (a ledger of the product's load-bearing statements: holds, narrower or not established), **challenge** (a fresh agent tests the evidence in both directions) and **verdict** (a fresh agent writes `SYNTHESIS.md` and answers the assignment questions). |
-| [`dkf-synthetic-data`](.claude/skills/dkf-synthetic-data/SKILL.md) | Builds dummy data so the code can run without patient data: from the code's data contract, from a disclosure-controlled codebook the statistician makes locally, or from dummy data the statistician supplies; adds edge cases and known-truth replicates. |
-| [`dkf-review-audit`](.claude/skills/dkf-review-audit/SKILL.md) | Mechanical audit of a finished review (depth `full`): coverage of every table, figure and code chunk, re-runs, print checks; corrections go back to the verdict. |
-| [`dkf-consistency-review`](.claude/skills/dkf-consistency-review/SKILL.md) | Compiles the review into the DKF form (`CONSISTENCY_REVIEW.md`, `.html`, `.org`) with computed Decision boxes, after fact, coverage and register gates; can write `REVIEW` comments into a copy of the `.qmd`. |
+| [`stats-review`](.claude/skills/stats-review/SKILL.md) | The review, in five stages: **document** (versions, consistency with protocol/SAP/registry, printed numbers and their arithmetic, design and estimand), **code-and-data** (code against text, Quarto/R mechanics, runs under the job's data mode, assumption and fragility checks, twelve clinical diagnostic modules), **statements** (a ledger of the product's load-bearing statements: holds, narrower or not established), **challenge** (a fresh agent tests the evidence in both directions) and **verdict** (a fresh agent writes `SYNTHESIS.md` and answers the assignment questions). |
+| [`stats-synthetic-data`](.claude/skills/stats-synthetic-data/SKILL.md) | Builds dummy data so the code can run without patient data: from the code's data contract, from a disclosure-controlled codebook the statistician makes locally, or from dummy data the statistician supplies; adds edge cases and known-truth replicates. |
+| [`stats-review-audit`](.claude/skills/stats-review-audit/SKILL.md) | Mechanical audit of a finished review (depth `full`): coverage of every table, figure and code chunk, re-runs, print checks; corrections go back to the verdict. |
+| [`stats-consistency-review`](.claude/skills/stats-consistency-review/SKILL.md) | Compiles the review into the DKF form (`CONSISTENCY_REVIEW.md`, `.html`, `.org`) with computed Decision boxes, after fact, coverage and register gates; can write `REVIEW` comments into a copy of the `.qmd`. |
 
 Clinical modules: sample size, simulation, estimand (ICH E9(R1)), RCT, missing data,
 time-to-event, multiplicity and subgroups, regression models, observational
@@ -60,7 +66,7 @@ the run when a data file sits where the data mode does not allow it. Reports and
 manuscripts with unpublished results need the documents' clearance too. At the time
 of writing the DKF has no zero-data-retention agreement with a model provider; check
 the current DKF rules before clearing anything beyond the default. Details:
-[`data-access.md`](.claude/skills/dkf-review/references/data-access.md).
+[`data-access.md`](.claude/skills/stats-review/references/data-access.md).
 
 ## Running a review
 
@@ -93,7 +99,7 @@ reviews (its `jobs/` folder is for trials and the synthetic demo, and is git-ign
 
    ```bash
    mkdir -p ~/.claude/skills
-   for s in dkf-review dkf-review-audit dkf-consistency-review dkf-synthetic-data; do
+   for s in stats-review stats-review-audit stats-consistency-review stats-synthetic-data; do
      ln -s "$PWD/.claude/skills/$s" ~/.claude/skills/$s
    done
    ```
@@ -102,12 +108,12 @@ reviews (its `jobs/` folder is for trials and the synthetic demo, and is git-ign
 2. **Create the job beside the product**, from the product's repository:
 
    ```bash
-   python3 ~/.claude/skills/dkf-review/scripts/new_job.py review/2026-11-12_quick \
+   python3 ~/.claude/skills/stats-review/scripts/new_job.py review/2026-11-12_quick \
      --product SSE001.qmd SSE001.pdf --governing ../protocol/protocol_v1.2.pdf
    ```
 
    On the web the script sits in this repository's clone
-   (`../stats_review/.claude/skills/dkf-review/scripts/new_job.py` from the product's
+   (`../stats_review/.claude/skills/stats-review/scripts/new_job.py` from the product's
    clone), or ask Claude to create the job. A product whose source reads other files
    (saved simulation results, a `_quarto.yml`) is given as its folder:
    `--product path/to/product_folder/`. The job
@@ -115,7 +121,7 @@ reviews (its `jobs/` folder is for trials and the synthetic demo, and is git-ign
    literature and any data out of every commit.
 3. **Fill in `00_ASSIGNMENT.md`**: product type, the questions for the reviewer, the
    documents it depends on, what is cleared, the data mode, the depth.
-4. **Ask the agent**: *"Review the product in review/2026-11-12_quick with dkf-review,
+4. **Ask the agent**: *"Review the product in review/2026-11-12_quick with stats-review,
    then write the consistency review."* It runs the clearance scan, states the depth,
    data mode and size class, asks you to check your usage, and waits for your go-ahead.
    A run that stops part-way resumes from the job's `PROGRESS.md`.
@@ -160,7 +166,7 @@ Claude Code is logged in with the subscription:
 
 ## Trying the first stage in chat
 
-`chat-skills/dkf-document-check.zip` is the document stage on its own, for Claude
+`chat-skills/stats-document-check.zip` is the document stage on its own, for Claude
 chat: upload it under Customize, Skills (code execution on), attach a product you may
 send and ask for a document check. It shows what the agents are told to do and returns
 findings, a consistency table and a check log, but it runs no product code; see
@@ -206,10 +212,10 @@ AGENTS.md              pointer to CLAUDE.md for other coding agents
 
 ```bash
 cd .claude/skills
-python3 -m pytest -q -p no:cacheprovider dkf-review/scripts/tests dkf-review-audit/scripts/tests \
-  dkf-consistency-review/scripts/tests dkf-consistency-review/ai-sweep/scripts/tests \
-  dkf-synthetic-data/scripts/tests ../../chat-skills/tests
-python3 dkf-review/scripts/check_suite_version.py
+python3 -m pytest -q -p no:cacheprovider stats-review/scripts/tests stats-review-audit/scripts/tests \
+  stats-consistency-review/scripts/tests stats-consistency-review/ai-sweep/scripts/tests \
+  stats-synthetic-data/scripts/tests ../../chat-skills/tests
+python3 stats-review/scripts/check_suite_version.py
 ```
 
 The R helpers (`recompute.R`, `make_codebook.R`, `synthesize.R`) have their own test

@@ -7,7 +7,7 @@ leave the machine through this repository.
 Create a job with
 
 ```bash
-python3 .claude/skills/dkf-review/scripts/new_job.py jobs/<yyyy-mm>_<product> \
+python3 .claude/skills/stats-review/scripts/new_job.py jobs/<yyyy-mm>_<product> \
   --product <rendered product and source, or the product folder> \
   --governing <protocol, SAP, registry entry> --lit <cited sources>
 ```
