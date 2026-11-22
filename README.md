@@ -1,4 +1,4 @@
-# A third pair of eyes: AI-assisted consistency review of statistical products
+# A third pair of eyes: AI-assisted consistency review of statistical products <img src="logo.svg" align="right" width="120" alt="Logo: a hexagon with two pairs of eyes above and a third, in mauve, looking over the edge of a page with its hands on it">
 
 Agent skills that prepare the consistency review of a statistical product (sample
 size estimation, protocol statistics sections, statistical analysis plan, statistical
@@ -204,6 +204,7 @@ jobs/                  trial and demo jobs only (git-ignored)
 tools/upstream_diff.sh what changed upstream since the fork
 tools/web_setup.sh     setup script for a Claude Code on the web environment
 LICENSE                MIT
+logo.svg               the logo, drawn in code; its wordmark is outlines of IBM Plex Mono Medium (SIL Open Font License)
 CLAUDE.md              instructions for Claude Code in this repository
 AGENTS.md              pointer to CLAUDE.md for other coding agents
 ```
