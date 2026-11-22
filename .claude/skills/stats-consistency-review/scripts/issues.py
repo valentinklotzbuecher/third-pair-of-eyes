@@ -300,7 +300,7 @@ def default_severity(rows):
 
 
 def decision(issues, answers=()):
-    """The five DKF decision boxes from the issues' severity, change and clarification."""
+    """The five decision boxes from the issues' severity, change and clarification."""
     def has(sev, kinds):
         return any(i["fields"].get("severity", "").strip().capitalize() == sev
                    and i["fields"].get("change", "").strip().lower() in kinds for i in issues)

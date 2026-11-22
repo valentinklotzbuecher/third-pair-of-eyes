@@ -8,7 +8,7 @@ metadata:
 
 # Document check
 
-The first stage of the DKF consistency review, on its own, for a chat. Read the product
+The first stage of the consistency review, on its own, for a chat. Read the product
 as an argument before touching code, with four questions: is it the document it says it
 is, and does it agree with the documents that govern it; do its printed numbers agree
 with each other and with their own arithmetic; does the design and analysis answer the

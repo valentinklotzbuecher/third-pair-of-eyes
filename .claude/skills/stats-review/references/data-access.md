@@ -5,15 +5,15 @@ a decision the operator makes before the run and records in `00_ASSIGNMENT.md`; 
 review enforces it and never widens it. When in doubt, the review reads less and
 records the limit.
 
-At the time of writing the DKF has no zero-data-retention agreement with a model
-provider, so assume that everything sent is retained under the provider's standard
-terms. Check the current DKF rules before clearing anything beyond the default.
+Unless your institution has a zero-data-retention agreement with the model provider,
+assume that everything sent is retained under the provider's standard terms. Check
+your institution's current rules before clearing anything beyond the default.
 
 ## What needs clearance
 
 | Material | Typical status | Clearance |
 |---|---|---|
-| Methods text and statistical code (SSE, SAP, protocol statistics sections, analysis code) | usually cleared under the DKF rules for LLM use | the operator confirms in `Documents:` |
+| Methods text and statistical code (SSE, SAP, protocol statistics sections, analysis code) | usually cleared under the institution's rules for LLM use | the operator confirms in `Documents:` |
 | Protocol drafts and other sponsor documents | may be confidential to the sponsor or PI | the operator confirms, naming the document |
 | Reports and manuscripts with results of an unpublished study | aggregate but confidential results | the operator confirms, naming who agreed (PI, sponsor) |
 | Patient-level data, coded or not | never by default | data mode `shared` only, with `Data clearance:` naming who approved it and on what basis |

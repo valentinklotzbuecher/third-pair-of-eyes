@@ -1,6 +1,6 @@
 # third-pair-of-eyes: project notes
 
-This repository holds agent skills for AI-assisted consistency review of DKF
+This repository holds agent skills for AI-assisted consistency review of
 statistical products (`.claude/skills/`), adapted from research_skills. `README.md` is
 the user guide.
 

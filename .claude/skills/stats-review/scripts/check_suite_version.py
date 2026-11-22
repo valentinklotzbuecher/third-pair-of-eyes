@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Gate for edits to the DKF review suite (stats-review, stats-review-audit,
+"""Gate for edits to the review suite (stats-review, stats-review-audit,
 stats-consistency-review, stats-synthetic-data). Adapted from the upstream
 research_skills `check_suite_version.py`; tags carry the prefix `skills-v` so they do
 not collide with other tags in the third-pair-of-eyes repository.
@@ -139,7 +139,7 @@ def check_git(root, version, fails, notes):
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--root", default=str(Path(__file__).resolve().parents[2]),
-                    help="skills tree holding the dkf-* skill folders")
+                    help="skills tree holding the stats-* skill folders")
     ap.add_argument("--no-git", action="store_true", help="skip tag checks")
     a = ap.parse_args()
     root = Path(a.root)
@@ -169,7 +169,7 @@ def main():
         print(f"NOTE: {n}")
     for f in fails:
         print(f"FAIL: {f}")
-    print(f"{'FAIL' if fails else 'PASS'}: DKF review suite version {version or '?'}")
+    print(f"{'FAIL' if fails else 'PASS'}: review suite version {version or '?'}")
     return 1 if fails else 0
 
 

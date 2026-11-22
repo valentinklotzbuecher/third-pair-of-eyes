@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """annotate_source.py — write REVIEW comments into a copy of the product's Quarto
-source, the way DKF reviewers annotate a .qmd ("see REVIEW comments in qmd file").
+source, the way reviewers annotate a .qmd ("see REVIEW comments in qmd file").
 
     python3 annotate_source.py ISSUES.md [--out-dir work/annotated]
 

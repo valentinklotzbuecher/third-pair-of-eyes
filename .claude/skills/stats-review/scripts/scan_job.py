@@ -25,7 +25,7 @@ data files are listed by name, size and sha256 only):
    error: true, warning: false, message: false, include: false), package loading
    (groundhog dates, renv), set.seed lines, files the code reads, inline `r` count.
 5. Reads PDF metadata with `pdfinfo` (when installed): title, author, creation
-   date, pages, the R and package versions the DKF template writes into Keywords,
+   date, pages, the R and package versions the dkfreporting template writes into Keywords,
    and a footer revision (`rev. N`) from `pdftotext`.
 6. Compares the source's SVN revision with the PDF's footer revision.
 

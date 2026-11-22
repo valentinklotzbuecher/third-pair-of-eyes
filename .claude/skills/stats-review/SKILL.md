@@ -1,7 +1,7 @@
 ---
 name: stats-review
 description: >-
-  Pre-human consistency review of a DKF statistical product written in Quarto/R: a
+  Pre-human consistency review of a statistical product written in Quarto/R: a
   sample size estimation (SSE), the statistics sections of a protocol, a statistical
   analysis plan (SAP), a statistical analysis report or a results manuscript. Reads
   the rendered document against its source code and the documents that govern it
@@ -15,7 +15,7 @@ metadata:
   based-on: "research_skills `review` 0.9.1 (isitcredible/research_skills@766f28f)"
 ---
 
-# DKF statistical review
+# Statistical review
 
 Establish whether a statistical product says what its evidence supports and whether
 its code does what its text says, before a second statistician does the consistency
@@ -145,7 +145,7 @@ core modules and what is out of scope.
     results or data. `references/data-access.md` has the full rules.
 12. **The reader is a colleague.** A finding is about the product: what is wrong, the
     evidence, what it changes, and a concrete fix. No motive, no blame, no taste: a
-    preference that no guideline, DKF convention or stated requirement backs is not a
+    preference that no guideline, house convention or stated requirement backs is not a
     finding. Typos matter only where they change a number, a definition or a reader's
     understanding.
 
@@ -187,9 +187,9 @@ provider, the data mode and the depth.
    never opens a data file), checks the assignment's clearance fields, flags every
    data-like file the data mode does not clear, reads the YAML of the Quarto source
    (title, params, including the `dkfreporting` product fields) and the metadata of
-   each PDF (creation date, and the R and package versions the DKF template writes
-   into the Keywords field), and writes `review/intake-scan.json`. A non-zero exit is
-   a clearance failure: stop and ask (unattended: `BLOCKED`, rule 11).
+   each PDF (creation date, and the R and package versions the `dkfreporting` template
+   writes into the Keywords field), and writes `review/intake-scan.json`. A non-zero exit
+   is a clearance failure: stop and ask (unattended: `BLOCKED`, rule 11).
 2. **Layout.** The job root holds:
 
    ```
@@ -210,7 +210,7 @@ provider, the data mode and the depth.
 3. **Records, before any stage work.** Write `PROGRESS.md`, `AGENTS.md` and
    `00_INTAKE.md` from `assets/PROGRESS-template.md`, `assets/AGENTS-template.md` and
    `assets/INTAKE-template.md` now, from the assignment and the scan: settings, the
-   questions verbatim numbered `Q1, Q2, …`, the inventory, the DKF product fields and
+   questions verbatim numbered `Q1, Q2, …`, the inventory, the product fields and
    the render environment where the scan found them, and `Suite version: <x>` copied
    from this skill's `metadata.version` (so a later audit knows what the run was asked
    to do). Document identities (title, version, date) are filled in as the documents
@@ -281,7 +281,7 @@ consistency checks of rule 5 still run on it.
 |---|---|---|---|
 | `quick` | two, then the form's verify pass | a **review agent** runs document, code-and-data (the profile's core modules worked through in the same agent) and statements, each with its report and gate; a fresh **verdict agent** writes `SYNTHESIS.md` and compiles the consistency review. No challenge stage, which the synthesis states in its status | a short product (an SSE, a protocol statistics section); a re-review of a revised product |
 | `standard` (default) | one per stage, then the form's compile and verify | all five stages and every module whose condition holds: worked through in the code-and-data agent for a short product, as their own agents one at a time for a long one | a first review |
-| `full` | standard, then `stats-review-audit` | standard, and the audit before the consistency review | high-risk products: confirmatory reports, high DKF risk, strong influence on the protocol |
+| `full` | standard, then `stats-review-audit` | standard, and the audit before the consistency review | high-risk products: confirmatory reports, high product risk, strong influence on the protocol |
 
 ## Proportion
 
@@ -335,7 +335,7 @@ artifacts. Applicability is decided per result family or calculation
    counts. It never sees the coordinator's reasoning. Nothing re-decides after it.
 
 Then, at depth `full`, `stats-review-audit`; then `stats-consistency-review` compiles the
-consistency review in the DKF form. At depth `quick` the first three stages run in one
+consistency review in the form. At depth `quick` the first three stages run in one
 review agent, each still ending with its report and gate, and the verdict agent
 compiles the consistency review after its own gate passes.
 

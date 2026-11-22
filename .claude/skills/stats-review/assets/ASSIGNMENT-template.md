@@ -9,7 +9,7 @@
 - Statistical product: <file name of the rendered product, e.g. th26Example2SSE001.pdf>
 - Product type: <sse | protocol | sap | report | manuscript | other>
 - Title: <study title or product title>
-- Internal ID: <DKF internal ID, if any>
+- Internal ID: <internal ID, if any>
 - Version: <revision, date or version line as printed>
 - Author(s): <statistician(s)>
 - Human reviewer: <colleague who will do the consistency review>
@@ -36,7 +36,7 @@
      references/data-access.md. Patient-level data is never sent unless the data mode
      is `shared` and the data clearance names who approved it and on what basis. -->
 
-- Documents: <what is cleared and by whom, e.g. "SSE text and code, protocol draft v1.2: no patient data; cleared under the DKF rules for LLM use (VK, 2026-10-27)">
+- Documents: <what is cleared and by whom, e.g. "SSE text and code, protocol draft v1.2: no patient data; cleared under the institution's rules for LLM use (VK, 2026-10-27)">
 - Data mode: <none | synthetic | shared>
 - Non-patient files: <data-like files inside 01_product/ that hold no patient data, e.g. dat/calc.rds (saved simulation results); or "none">
 - Data clearance: <only for mode `shared`: who approved processing of which data by which provider, on what basis; otherwise "not applicable">

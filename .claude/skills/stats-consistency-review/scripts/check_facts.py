@@ -2,7 +2,7 @@
 """Fact-check sweep for a review issue ledger (ISSUES.md) before rendering.
 
 Adapted from the upstream research_skills review-digest script for stats-review jobs:
-the DKF ledger fields are internal, and the rendered consistency review and the
+this suite's ledger fields are internal, and the rendered consistency review and the
 annotated source copies are outputs, never corpus.
 
 Not a verdict — a worklist. The sweep prints every quoted span and every

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Prose-register sweep for a review issue ledger (ISSUES.md).
 
-Adapted from the upstream research_skills review-digest shim: the DKF ledger fields
+Adapted from the upstream research_skills review-digest shim: this suite's ledger fields
 are exempt, and the stats-review stage names count as review-internal references.
 
 The engine is canonical in the `ai-sweep` skill nested in this one, resolved
@@ -94,7 +94,7 @@ def verif_flags(path):
     flag. One flag per line; the clause excerpt shows which segment hit,
     the normed line lets a recorded keep bind to the whole line.
 
-    DKF adaptation: the failures-only rule binds the `## Issues` section
+    Adaptation: the failures-only rule binds the `## Issues` section
     only. General comments and the answers to the assignment questions may
     confirm what the author asked to have confirmed ("the sample size of 270
     is reproduced by an independent calculation")."""

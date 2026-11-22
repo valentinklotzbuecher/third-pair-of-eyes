@@ -4,9 +4,9 @@ What each product type is reviewed against, which statements carry it, which che
 and modules are core (they run at every depth), and what is out of scope. The
 assignment can narrow or widen the scope; record any change in `00_INTAKE.md`.
 
-## Reading the DKF product fields
+## Reading the product fields
 
-Quarto sources built on the DKF `dkfreporting` template carry product fields in their
+Quarto sources built on the `dkfreporting` template carry product fields in their
 YAML `params` (for example `product-type`, `internal-dkf-id`, `level-of-assumptions`,
 `influence-on-protocol`, `multicentre`, `type-of-review`, `final-product-risk`,
 `estimated-time-for-review`). `scan_job.py` reads them into `review/intake-scan.json`.

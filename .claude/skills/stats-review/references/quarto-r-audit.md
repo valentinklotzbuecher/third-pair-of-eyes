@@ -40,8 +40,8 @@ read them first.
   `RNGkind("L'Ecuyer-CMRG")` with `parallel`). Record the RNG kind (`RNGkind()`); the
   sample kind changed in R 3.6.0, so older code reproduces only with the old setting.
 - **Package versions**: `groundhog.library(pkg, date)` or `renv.lock` pin versions;
-  compare with the R and package versions the rendered PDF records (the DKF template
-  writes them into the PDF Keywords field; `scan_job.py` extracts them). A render made
+  compare with the R and package versions the rendered PDF records (the `dkfreporting`
+  template writes them into the PDF Keywords field; `scan_job.py` extracts them). A render made
   with versions other than the pinned ones is recorded. Where the pinned versions
   cannot be installed for the review, shim and log (`../SKILL.md`, Running it).
 - **Paths**: absolute paths, `setwd()`, files read from outside the project, network
@@ -67,6 +67,6 @@ produce.
 
 ## Templates
 
-DKF products built on the `dkfreporting` template carry product metadata in YAML
+Products built on the `dkfreporting` template carry product metadata in YAML
 `params` and render to `dkf-pdf`, `dkf-docx` or `dkf-html`. The template's own code
 (title page, metadata, styling) is not part of the review unless it changes content.

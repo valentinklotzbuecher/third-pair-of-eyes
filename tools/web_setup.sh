@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Setup script for a Claude Code on the web environment that runs the DKF review skills.
+# Setup script for a Claude Code on the web environment that runs the review skills.
 #
 # Paste this file's contents into the environment's settings (the environment menu in
 # the session's title bar, then Edit, then Setup script). New sessions run it before

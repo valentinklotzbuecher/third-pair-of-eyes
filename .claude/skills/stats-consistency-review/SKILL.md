@@ -1,7 +1,7 @@
 ---
 name: stats-consistency-review
 description: >-
-  Compile a finished `stats-review` run into the DKF consistency-review form for the
+  Compile a finished `stats-review` run into the consistency-review form for the
   human reviewer: Assignment, Decision boxes (computed), General comments, Major and
   Minor issues, Answers to the issues listed in the assignment, and what the review
   could not check. Writes the issue ledger ISSUES.md, gates it for facts, coverage and
@@ -39,7 +39,7 @@ review's process**: no sentence reports what the review suspected, ran or discar
 review artifacts, row IDs and stage names never appear in rendered prose (provenance
 lives in `sources:`).
 
-**Severity is assigned here** (Major or Minor) as the DKF form needs it: a default
+**Severity is assigned here** (Major or Minor) as the form needs it: a default
 from the statement rows each issue carries, from which the compiler may depart with a
 stated reason. **Where the fix lies** (text, R code, both, or a clarification) comes
 from each finding's `where:` line in the synthesis.
@@ -163,7 +163,7 @@ The default for each issue is the most severe over the statement rows it carries
 | `not established` | Major | Major | Minor |
 | `narrower` | Major | Minor | Minor |
 
-An issue that carries no row that fails defaults to Minor. "Major" in the DKF form
+An issue that carries no row that fails defaults to Minor. "Major" in the form
 means a change that needs a second review; depart from the default with a
 `severity-reason:` naming the fact that justifies it ("the slip is in one caption;
 the code and four other mentions use the right value", "the missing source exists and

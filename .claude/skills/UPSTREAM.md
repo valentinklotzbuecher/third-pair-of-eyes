@@ -13,9 +13,9 @@ Upstream reviews published economics papers with replication packages. This suit
 keeps its architecture (staged review, fresh-context challenge, a single verdict,
 mechanical audit, gated deliverable, progress file, agents-and-cost rules) and its
 epistemic rules (the record, coverage as a list, traceable numbers, the burden on the
-product, both-direction challenge), and replaces the domain: DKF statistical products
+product, both-direction challenge), and replaces the domain: statistical products
 (SSE, protocol statistics sections, SAP, report, manuscript) in Quarto/R, clinical
-diagnostic modules, data-protection rules with optional synthetic data, and the DKF
+diagnostic modules, data-protection rules with optional synthetic data, and the
 consistency-review form as the deliverable.
 
 ## Verbatim copies
@@ -59,7 +59,7 @@ changes.
 | `stats-review-audit/scripts/check_spec_drift.py` and its test | `audit-review/scripts/check_spec_drift.py` |
 | `stats-review-audit/scripts/check_coverage.py` | `audit-review/scripts/check_coverage.py` (concept) |
 | `stats-consistency-review/SKILL.md` | `review-digest/SKILL.md` |
-| `stats-consistency-review/scripts/check_facts.py`, `check_style.py` | `review-digest/scripts/` (DKF fields; failures-only rule limited to the issue list) |
+| `stats-consistency-review/scripts/check_facts.py`, `check_style.py` | `review-digest/scripts/` (this suite's fields; failures-only rule limited to the issue list) |
 | `stats-consistency-review/scripts/check_issue_coverage.py`, `render_review.py` | `review-digest/scripts/check_ledger_coverage.py`, `render_digest.py` (concepts) |
 
 ## New here

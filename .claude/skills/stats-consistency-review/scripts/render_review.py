@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""render_review.py — render the consistency-review ledger (ISSUES.md) in the DKF
+"""render_review.py — render the consistency-review ledger (ISSUES.md) in the
 consistency-review form.
 
     python3 render_review.py ISSUES.md [--out-stem CONSISTENCY_REVIEW] [--org]
                                        [--finalize]
 
 Writes <stem>.md (the form in Markdown), <stem>.html (self-contained, print-ready)
-and, with --org, <stem>.org (the Emacs org layout of the DKF template). The Decision
+and, with --org, <stem>.org (the Emacs org layout of the review template). The Decision
 boxes are computed from the issues, never written by hand:
 
   minor/major changes in the text   ← a Minor/Major issue with change text or text and code
@@ -58,7 +58,7 @@ def build_markdown(led, final, problems, root=None):
              f"**Review depth:** {meta.get('depth', 'standard')}",
              f"**Patient data:** {data_mode_words(meta.get('data-mode', 'none'))}"]
     out += [" · ".join(facts), ""]
-    out += ["> Pre-human review prepared by an AI agent with the DKF review skills "
+    out += ["> Pre-human review prepared by an AI agent with the review skills "
             f"(v{suite_version()}). It prepares the consistency review by a second "
             "statistician and does not replace it.", ""]
     if not final:
@@ -333,7 +333,7 @@ def org_inline(s):
 
 
 def build_org(led, root=None):
-    """The DKF template's org layout: *** CONSISTENCY REVIEW, **** Assignment, …"""
+    """The review template's org layout: *** CONSISTENCY REVIEW, **** Assignment, …"""
     secs = led["sections"]
     out = ["*** CONSISTENCY REVIEW", "**** Assignment"]
     out += [org_inline(ln) for ln in secs.get("assignment", "").strip().split("\n")]
@@ -373,11 +373,11 @@ REVIEWER_NOTE = """\
 # For the reviewer
 
 This folder holds a draft of the consistency review of {product}, prepared by an AI agent
-with the DKF review skills (v{version}, depth {depth}; {status}). It prepares your review
+with the review skills (v{version}, depth {depth}; {status}). It prepares your review
 and does not replace it: you decide what goes into the form, and you sign it.
 
 - **Read** `CONSISTENCY_REVIEW.html` (or `.md`). Edit the form in `CONSISTENCY_REVIEW.org`,
-  or copy what you keep into the DKF template.
+  or copy what you keep into your review template.
 - **In the source**, `work/annotated/` holds a copy of the `.qmd` with a `REVIEW` comment
   at each line an issue concerns; the comments carry the form's labels (Major 1, Minor 2).
 - **Check a claim** through the links under "Evidence behind each issue" at the end of
@@ -385,7 +385,7 @@ and does not replace it: you decide what goes into the form, and you sign it.
 - **Record your decision** on every issue in `DISPOSITIONS.md` (kept, edited or dropped,
   with a reason), then run
   `python3 <stats-consistency-review skill>/scripts/check_dispositions.py DISPOSITIONS.md`.
-- **Ask questions** by opening Claude Code in this folder with the DKF review skills
+- **Ask questions** by opening Claude Code in this folder with the review skills
   available: "Walk me through Major 1", "Re-run the sample size with a correlation of
   0.6". It answers from the evidence, re-runs in `work/followup/`, records the decisions
   you state, and changes the form only when you ask.

@@ -1,4 +1,4 @@
-# Consistency review (DKF form)
+# Consistency review (the form)
 
 The layout the human consistency review uses, which `render_review.py` reproduces.
 For reference; the rendered form is generated from `ISSUES.md`.

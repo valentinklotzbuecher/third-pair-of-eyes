@@ -19,7 +19,7 @@ Intake date: <yyyy-mm-dd>
 
 Governing documents not in the job (and so `unverified-here` for every check that needs them): <list, or "none">.
 
-## DKF product fields
+## Product fields
 
 <from review/intake-scan.json: internal ID, product type, level of assumptions, influence on protocol, multicentre, risk; "not present" when the source has no dkfreporting params>
 

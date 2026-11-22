@@ -1,11 +1,11 @@
-# AI-assisted consistency review for DKF statistical products
+# A third pair of eyes: AI-assisted consistency review of statistical products
 
-Agent skills that prepare the consistency review of a DKF statistical product (sample
+Agent skills that prepare the consistency review of a statistical product (sample
 size estimation, protocol statistics sections, statistical analysis plan, statistical
 report, results manuscript) before a second statistician reviews it. An AI agent reads
 the rendered document against its Quarto/R source and the documents that govern it,
 recomputes what can be recomputed, runs the code where the data rules allow, has every
-finding challenged by a fresh agent, and writes a draft in the DKF consistency-review
+finding challenged by a fresh agent, and writes a draft in a consistency-review
 form: Decision boxes, General comments, Major and Minor issues, and answers to the
 questions in the assignment.
 
@@ -30,7 +30,7 @@ product; it has not yet been run on the demo. A trial on one real SSE ran the fi
 two stages. The data modes `synthetic` and `shared` have not yet run on a real
 product.
 
-Version 0.4 renames the skills so they read well outside DKF: `stats-review`,
+Version 0.4 renames the skills, which carried their department's name: `stats-review`,
 `stats-review-audit`, `stats-consistency-review`, `stats-synthetic-data` and the chat
 skill `stats-document-check` (they were `dkf-review` and so on); what they do is
 unchanged. A job made with an earlier version names the old folders; read `dkf-<name>`
@@ -43,7 +43,7 @@ as `stats-<name>`.
 | [`stats-review`](.claude/skills/stats-review/SKILL.md) | The review, in five stages: **document** (versions, consistency with protocol/SAP/registry, printed numbers and their arithmetic, design and estimand), **code-and-data** (code against text, Quarto/R mechanics, runs under the job's data mode, assumption and fragility checks, twelve clinical diagnostic modules), **statements** (a ledger of the product's load-bearing statements: holds, narrower or not established), **challenge** (a fresh agent tests the evidence in both directions) and **verdict** (a fresh agent writes `SYNTHESIS.md` and answers the assignment questions). |
 | [`stats-synthetic-data`](.claude/skills/stats-synthetic-data/SKILL.md) | Builds dummy data so the code can run without patient data: from the code's data contract, from a disclosure-controlled codebook the statistician makes locally, or from dummy data the statistician supplies; adds edge cases and known-truth replicates. |
 | [`stats-review-audit`](.claude/skills/stats-review-audit/SKILL.md) | Mechanical audit of a finished review (depth `full`): coverage of every table, figure and code chunk, re-runs, print checks; corrections go back to the verdict. |
-| [`stats-consistency-review`](.claude/skills/stats-consistency-review/SKILL.md) | Compiles the review into the DKF form (`CONSISTENCY_REVIEW.md`, `.html`, `.org`) with computed Decision boxes, after fact, coverage and register gates; can write `REVIEW` comments into a copy of the `.qmd`. |
+| [`stats-consistency-review`](.claude/skills/stats-consistency-review/SKILL.md) | Compiles the review into the consistency-review form (`CONSISTENCY_REVIEW.md`, `.html`, `.org`) with computed Decision boxes, after fact, coverage and register gates; can write `REVIEW` comments into a copy of the `.qmd`. |
 
 Clinical modules: sample size, simulation, estimand (ICH E9(R1)), RCT, missing data,
 time-to-event, multiplicity and subgroups, regression models, observational
@@ -62,9 +62,10 @@ the job's `00_ASSIGNMENT.md` before the run, and the review never widens it.
 
 Before the agent opens anything, `scan_job.py` checks the clearance fields and stops
 the run when a data file sits where the data mode does not allow it. Reports and
-manuscripts with unpublished results need the documents' clearance too. At the time
-of writing the DKF has no zero-data-retention agreement with a model provider; check
-the current DKF rules before clearing anything beyond the default. Details:
+manuscripts with unpublished results need the documents' clearance too. Unless your
+institution has a zero-data-retention agreement with the model provider, assume that
+everything sent is retained; check your institution's rules before clearing anything
+beyond the default. Details:
 [`data-access.md`](.claude/skills/stats-review/references/data-access.md).
 
 ## Running a review
@@ -161,7 +162,7 @@ Claude Code is logged in with the subscription:
   coding sessions may be used for model training is a privacy setting
   ([Anthropic's consumer terms](https://www.anthropic.com/news/updates-to-our-consumer-terms));
   commercial plans (Team, Enterprise, Education) and the API are not covered by it.
-  Check the setting and the DKF rules before clearing any document.
+  Check the setting and your institution's rules before clearing any document.
 
 ## Trying the first stage in chat
 

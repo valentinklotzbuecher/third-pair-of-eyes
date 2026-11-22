@@ -25,7 +25,7 @@ chat reads goes to the model provider under your plan's terms.
 
 One stage of the review, not the review. Without running the product's code it cannot
 establish what the code computes; it lists that as leads. There is no fresh-context
-challenge, no verdict and no DKF form; for those, run `stats-review` in Claude Code
+challenge, no verdict and no consistency-review form; for those, run `stats-review` in Claude Code
 (`../README.md`).
 
 ## Maintaining it
