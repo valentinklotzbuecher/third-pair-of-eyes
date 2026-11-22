@@ -36,14 +36,6 @@ __pycache__/
 *_cache/
 .quarto/
 
-# Archived prototype: local inputs and run records
-archive/2026_api_prototype/review_examples/*.pdf
-archive/2026_api_prototype/review_examples/dat/
-archive/2026_api_prototype/review_results/prototype_jobs/
-archive/2026_api_prototype/review_results/prototype_runs/
-archive/2026_api_prototype/review_prototype.html
-archive/2026_api_prototype/review_prototype.pdf
-
 # OS and editor files
 .DS_Store
 .DS_Store?

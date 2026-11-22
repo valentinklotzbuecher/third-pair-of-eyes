@@ -2,7 +2,7 @@
 
 This repository holds agent skills for AI-assisted consistency review of DKF
 statistical products (`.claude/skills/`), adapted from research_skills. `README.md` is
-the user guide. The earlier API prototype is in `archive/` and is not maintained.
+the user guide.
 
 ## Running a review
 

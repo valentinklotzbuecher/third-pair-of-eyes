@@ -12,8 +12,7 @@ questions in the assignment.
 The skills are adapted from Joe Francis's
 [research_skills](https://github.com/isitcredible/research_skills) (The Catalogue of
 Errors Ltd, MIT licence, v0.9.1); see [`.claude/skills/UPSTREAM.md`](.claude/skills/UPSTREAM.md)
-for what was kept, adapted and replaced. The earlier single-call API prototype is in
-[`archive/`](archive/README.md).
+for what was kept, adapted and replaced.
 
 The review is an aid to the human consistency review, not a replacement. It says what
 it checked, on what evidence, and what it could not check.
@@ -203,7 +202,6 @@ chat-skills/           stand-alone skills for Claude chat, outside the suite
 jobs/                  trial and demo jobs only (git-ignored)
 tools/upstream_diff.sh what changed upstream since the fork
 tools/web_setup.sh     setup script for a Claude Code on the web environment
-archive/               the earlier API prototype
 CLAUDE.md              instructions for Claude Code in this repository
 AGENTS.md              pointer to CLAUDE.md for other coding agents
 ```
