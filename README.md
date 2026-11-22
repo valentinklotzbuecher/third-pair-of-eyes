@@ -204,7 +204,7 @@ jobs/                  trial and demo jobs only (git-ignored)
 tools/upstream_diff.sh what changed upstream since the fork
 tools/web_setup.sh     setup script for a Claude Code on the web environment
 LICENSE                MIT
-logo.svg               the logo, drawn in code; its wordmark is outlines of IBM Plex Mono Medium (SIL Open Font License)
+logo.svg               the logo, drawn in code
 CLAUDE.md              instructions for Claude Code in this repository
 AGENTS.md              pointer to CLAUDE.md for other coding agents
 ```
