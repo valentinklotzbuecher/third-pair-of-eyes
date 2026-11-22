@@ -13,7 +13,7 @@ description: >-
   (explain an issue's evidence, re-run with changed inputs, record which issues they
   keep).
 metadata:
-  version: "0.4.0"
+  version: "0.4.1"
   based-on: "research_skills `review-digest` 0.9.1 (isitcredible/research_skills@766f28f)"
 ---
 

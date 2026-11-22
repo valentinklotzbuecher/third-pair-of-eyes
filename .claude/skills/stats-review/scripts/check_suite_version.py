@@ -2,7 +2,7 @@
 """Gate for edits to the DKF review suite (stats-review, stats-review-audit,
 stats-consistency-review, stats-synthetic-data). Adapted from the upstream
 research_skills `check_suite_version.py`; tags carry the prefix `skills-v` so they do
-not collide with other tags in the stats_review repository.
+not collide with other tags in the third-pair-of-eyes repository.
 
 Checks:
   1. The four SKILL.md frontmatters carry the same `metadata.version`.

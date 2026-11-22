@@ -2,8 +2,8 @@
 name: stats-document-check
 description: Document check of a statistical product (a sample size estimation, the statistics sections of a protocol, a statistical analysis plan, a statistical report or a results manuscript) before a second statistician reviews it. Checks identity and versions, consistency with the governing documents, the printed numbers and their arithmetic, and the design, estimand and method; recomputes printed numbers with scripts; returns findings, tables and a check log. Does not run the product's code. Use when asked to check, review or consistency-review such a document in a chat.
 metadata:
-  version: "0.2.0"
-  based-on: "stats_review stats-review document stage, suite 0.4.0 (stage text unchanged since 0.1.0)"
+  version: "0.2.1"
+  based-on: "third-pair-of-eyes stats-review document stage, suite 0.4.1 (stage text unchanged since 0.1.0)"
 ---
 
 # Document check

@@ -1,6 +1,6 @@
 """recompute.py -- helpers for the document check's arithmetic.
 
-A port of the stats-review suite's assets/recompute.R (stats_review) to the Python
+A port of the stats-review suite's assets/recompute.R (third-pair-of-eyes) to the Python
 standard library, so the checks run in a chat's code sandbox without R or extra
 packages. Import it from a check script:
 
@@ -9,7 +9,7 @@ packages. Import it from a check script:
     from recompute import *
 
 Every function returns plain numbers, tuples or dicts, to print and to enter in the
-check log. Tested against recompute.R in stats_review/chat-skills/tests.
+check log. Tested against recompute.R in third-pair-of-eyes/chat-skills/tests.
 """
 import math
 import re

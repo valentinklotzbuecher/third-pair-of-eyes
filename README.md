@@ -17,7 +17,7 @@ for what was kept, adapted and replaced.
 The review is an aid to the human consistency review, not a replacement. It says what
 it checked, on what evidence, and what it could not check.
 
-**Status: version 0.4.0.** Three runs on a synthetic demonstration SSE with six
+**Status: version 0.4.1.** Three runs on a synthetic demonstration SSE with six
 planted issues (DEMO-TKA, two pages; kept outside this repository so no run can read
 its answer key) found all six and sized each one; one run also caught an error in the
 answer key. The two at depth `standard` (version 0.1) took about 3.4 and 1.6 hours of
@@ -112,7 +112,7 @@ reviews (its `jobs/` folder is for trials and the synthetic demo, and is git-ign
    ```
 
    On the web the script sits in this repository's clone
-   (`../stats_review/.claude/skills/stats-review/scripts/new_job.py` from the product's
+   (`../third-pair-of-eyes/.claude/skills/stats-review/scripts/new_job.py` from the product's
    clone), or ask Claude to create the job. A product whose source reads other files
    (saved simulation results, a `_quarto.yml`) is given as its folder:
    `--product path/to/product_folder/`. The job

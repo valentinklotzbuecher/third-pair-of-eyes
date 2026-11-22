@@ -10,7 +10,7 @@ description: >-
   an answer or the bottom line rests on goes back to the verdict stage. Declares the
   evidence handoff for the consistency review.
 metadata:
-  version: "0.4.0"
+  version: "0.4.1"
   based-on: "research_skills `audit-review` 0.9.1 (isitcredible/research_skills@766f28f)"
 ---
 
@@ -49,7 +49,7 @@ number or row ID as a noun (`stats-review` rule 10). The data-protection rules o
   to do. Record the version you audit against in `CHANGELOG.md`.
 - **Back up with the repository, never with copies.** Commit the job tree before
   applying corrections (a job folder that is not a repository gets `git init`, local,
-  no remote; the `jobs/` folder of the stats_review repository is git-ignored, so the
+  no remote; the `jobs/` folder of the third-pair-of-eyes repository is git-ignored, so the
   job's own repository never reaches GitHub). Re-run in place and read drift with
   `git diff`.
 - Size, route and run every worker by `stats-review`'s *Agents and cost* section. Every
