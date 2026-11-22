@@ -203,6 +203,7 @@ chat-skills/           stand-alone skills for Claude chat, outside the suite
 jobs/                  trial and demo jobs only (git-ignored)
 tools/upstream_diff.sh what changed upstream since the fork
 tools/web_setup.sh     setup script for a Claude Code on the web environment
+LICENSE                MIT
 CLAUDE.md              instructions for Claude Code in this repository
 AGENTS.md              pointer to CLAUDE.md for other coding agents
 ```
@@ -222,6 +223,6 @@ scripts, run by the Python suite when `Rscript` is installed.
 
 ## Licence
 
-Internal use, Department of Clinical Research, University of Basel. The files derived
-from research_skills keep its MIT licence and copyright notice
+MIT; see [`LICENSE`](LICENSE). The files derived from research_skills keep its MIT
+licence and copyright notice
 ([`LICENSE-research_skills`](.claude/skills/LICENSE-research_skills)).
